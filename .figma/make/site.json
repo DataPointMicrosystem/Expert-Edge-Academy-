@@ -1,0 +1,10 @@
+{
+  "description": "Discover and access a wide range of online courses while empowering instructors to create and monetize their educational content effectively.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

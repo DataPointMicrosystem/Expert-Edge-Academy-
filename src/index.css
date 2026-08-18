@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius-DEFAULT: var(--radius);
+}
+
+:root {
+  --background: #F9F8F5;
+  --foreground: #16192B;
+  --card: #FFFFFF;
+  --card-foreground: #16192B;
+  --primary: #1B1F3B;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EEF0F8;
+  --secondary-foreground: #1B1F3B;
+  --muted: #F0EFE9;
+  --muted-foreground: #6B6F87;
+  --accent: #F5A623;
+  --accent-foreground: #16192B;
+  --border: #E3E2DC;
+  --ring: #F5A623;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: #0E1020;
+  --foreground: #F0EFF8;
+  --card: #1B1F3B;
+  --card-foreground: #F0EFF8;
+  --primary: #F5A623;
+  --primary-foreground: #16192B;
+  --secondary: #252A4A;
+  --secondary-foreground: #F0EFF8;
+  --muted: #1E2240;
+  --muted-foreground: #8D91AA;
+  --accent: #F5A623;
+  --accent-foreground: #16192B;
+  --border: #2C3155;
+  --ring: #F5A623;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+*:hover::-webkit-scrollbar {
+  opacity: 1;
+}
