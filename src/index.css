@@ -1,8 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap");
 
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme inline {
+  --color-primary-blue: var(--color-primary-blue);
+  --color-deep-blue: var(--color-deep-blue);
+  --color-secondary-blue: var(--color-secondary-blue);
+  --color-academy-gray: var(--color-academy-gray);
+  --color-charcoal: var(--color-charcoal);
+  --color-neutral-900: var(--color-neutral-900);
+  --color-neutral-800: var(--color-neutral-800);
+  --color-neutral-700: var(--color-neutral-700);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-500: var(--color-neutral-500);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -21,38 +39,70 @@
 }
 
 :root {
-  --background: #F9F8F5;
-  --foreground: #16192B;
-  --card: #FFFFFF;
-  --card-foreground: #16192B;
-  --primary: #1B1F3B;
-  --primary-foreground: #FFFFFF;
-  --secondary: #EEF0F8;
-  --secondary-foreground: #1B1F3B;
-  --muted: #F0EFE9;
-  --muted-foreground: #6B6F87;
-  --accent: #F5A623;
-  --accent-foreground: #16192B;
-  --border: #E3E2DC;
-  --ring: #F5A623;
+  /* ExpertEdge Academy - Primary Brand Colors */
+  --color-primary-blue: #015196;
+  --color-deep-blue: #003b6d;
+  --color-secondary-blue: #00549c;
+
+  /* ExpertEdge Academy - Secondary Colors */
+  --color-academy-gray: #565553;
+  --color-charcoal: #333333;
+
+  /* ExpertEdge Academy - Neutral Colors */
+  --color-neutral-900: #1f2933;
+  --color-neutral-800: #323a40;
+  --color-neutral-700: #565553;
+  --color-neutral-600: #6b7280;
+  --color-neutral-500: #9ca3af;
+  --color-neutral-400: #d1d5db;
+  --color-neutral-300: #e5e7eb;
+  --color-neutral-200: #edf0f2;
+  --color-neutral-100: #f7f8fa;
+
+  /* ExpertEdge Academy - System Colors */
+  --color-success: #16a34a;
+  --color-success-light: #dcfce7;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-error: #dc2626;
+  --color-error-light: #fee2e2;
+  --color-info: #2563eb;
+  --color-info-light: #dbeafe;
+
+  /* Light Mode */
+  --background: #f7f8fa;
+  --foreground: #333333;
+  --card: #ffffff;
+  --card-foreground: #333333;
+  --primary: #015196;
+  --primary-foreground: #ffffff;
+  --secondary: #e5e7eb;
+  --secondary-foreground: #333333;
+  --muted: #f7f8fa;
+  --muted-foreground: #777777;
+  --accent: #015196;
+  --accent-foreground: #ffffff;
+  --border: #e5e7eb;
+  --ring: #015196;
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: #0E1020;
-  --foreground: #F0EFF8;
-  --card: #1B1F3B;
-  --card-foreground: #F0EFF8;
-  --primary: #F5A623;
-  --primary-foreground: #16192B;
-  --secondary: #252A4A;
-  --secondary-foreground: #F0EFF8;
-  --muted: #1E2240;
-  --muted-foreground: #8D91AA;
-  --accent: #F5A623;
-  --accent-foreground: #16192B;
-  --border: #2C3155;
-  --ring: #F5A623;
+  /* Dark Mode */
+  --background: #1f2933;
+  --foreground: #f7f8fa;
+  --card: #323a40;
+  --card-foreground: #f7f8fa;
+  --primary: #015196;
+  --primary-foreground: #ffffff;
+  --secondary: #323a40;
+  --secondary-foreground: #f7f8fa;
+  --muted: #1f2933;
+  --muted-foreground: #9ca3af;
+  --accent: #015196;
+  --accent-foreground: #ffffff;
+  --border: #323a40;
+  --ring: #015196;
 }
 
 * {
@@ -64,14 +114,18 @@ html {
 }
 
 body {
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: "Outfit", system-ui, sans-serif;
   background-color: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, .font-display {
-  font-family: 'Fraunces', Georgia, serif;
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: "Fraunces", Georgia, serif;
 }
 
 ::-webkit-scrollbar {
