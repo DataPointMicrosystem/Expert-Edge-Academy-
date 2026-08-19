@@ -165,7 +165,7 @@ function HeroCarousel() {
     </div>
   ))}
 </div>
-        </div>
+      </div>
 
         {/* Featured card */}
         <div
