@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import expertedgeLogo from "../asset/expertedgeLogo.jpg";
+import ExploreDropdown from "./ExploreDropdown";
+import TeachDropdown from "./TeachDropdown";
 
 export default function Navbar() {
   const { count } = useCart();
@@ -18,7 +20,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-neutral-300 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-3 h-16">
+      <div className="max-w-375 mx-auto px-4 sm:px-6 flex items-center gap-8 h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <img
@@ -31,7 +33,7 @@ export default function Navbar() {
         {/* Search */}
         <form
           onSubmit={handleSearch}
-          className="hidden md:flex flex-1 max-w-lg"
+          className="hidden md:flex flex-1 max-w-200"
         >
           <div className="relative w-full">
             <svg
@@ -56,18 +58,8 @@ export default function Navbar() {
 
         {/* Nav links */}
         <nav className="hidden lg:flex items-center gap-1 ml-2">
-          <Link
-            to="/"
-            className="text-sm font-medium px-3 py-2 rounded-lg text-neutral-700 hover:text-primary-blue hover:bg-neutral-100 transition-colors"
-          >
-            Explore
-          </Link>
-          <Link
-            to="/teach"
-            className="text-sm font-medium px-3 py-2 rounded-lg text-neutral-700 hover:text-primary-blue hover:bg-neutral-100 transition-colors"
-          >
-            Teach
-          </Link>
+          <ExploreDropdown />
+          <TeachDropdown />
         </nav>
 
         <div className="flex items-center gap-2 ml-auto">
@@ -114,13 +106,13 @@ export default function Navbar() {
             <>
               <Link
                 to="/login"
-                className="hidden sm:block text-sm font-semibold px-4 py-2 rounded-full border-2 border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all"
+                className="hidden sm:block text-sm font-semibold px-4 py-2 rounded-[10px] border-2 border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all"
               >
                 Log in
               </Link>
               <Link
                 to="/signup"
-                className="text-sm font-semibold px-4 py-2 rounded-full bg-primary-blue text-white hover:opacity-90 transition-opacity shadow-sm"
+                className="text-sm font-semibold px-4 py-2.5 rounded-[10px] bg-primary-blue text-white hover:opacity-90 transition-opacity shadow-sm"
               >
                 Sign up
               </Link>

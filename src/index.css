@@ -3,6 +3,8 @@
 @import "tailwindcss";
 
 @theme inline {
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
   --color-primary-blue: var(--color-primary-blue);
   --color-deep-blue: var(--color-deep-blue);
   --color-secondary-blue: var(--color-secondary-blue);
@@ -39,6 +41,9 @@
 }
 
 :root {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+
   /* ExpertEdge Academy - Primary Brand Colors */
   --color-primary-blue: #015196;
   --color-deep-blue: #003b6d;
@@ -114,7 +119,7 @@ html {
 }
 
 body {
-  font-family: "Outfit", system-ui, sans-serif;
+  font-family: var(--font-body);
   background-color: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
@@ -125,7 +130,7 @@ h2,
 h3,
 h4,
 .font-display {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: var(--font-display);
 }
 
 ::-webkit-scrollbar {
