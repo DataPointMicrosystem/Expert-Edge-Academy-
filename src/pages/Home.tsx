@@ -6,42 +6,41 @@ import CourseCard from "../components/CourseCard";
 const HERO_SLIDES = [
   {
     id: 1,
-    tag: "Limited time offer",
-    headline: "Skills that open\nevery door.",
-    sub: "Learn from industry experts with hands-on projects. From code to cameras, finance to design.",
+    tag: "Learn. Grow. Get ahead.",
+    headline: "Skills that move\nyou forward.",
+    sub: "Learn practical skills from experienced instructors and build the knowledge you need for your career, business, and future.",
     cta: "Explore courses",
     ctaHref: "#courses",
-    accent: "#F5A623",
-    bg: "from-[#1B1F3B] to-[#2d3360]",
+    accent: "#00549C",
+    bg: "from-[#001B33] to-[#003B6D]",
     img: "photo-1522202176988-66273c2fd55f",
-    badge: "2.4M+ learners worldwide",
+    badge: "Learn from expert instructors",
   },
   {
     id: 2,
-    tag: "New arrivals",
-    headline: "Master AI &\nMachine Learning.",
-    sub: "Stay ahead of the curve with our latest AI, ML, and data science tracks — updated monthly.",
-    cta: "Browse AI courses",
+    tag: "Explore new skills",
+    headline: "Learn today.\nBuild tomorrow.",
+    sub: "Discover courses in technology, business, design, finance, marketing, and more — all in one learning platform.",
+    cta: "Browse courses",
     ctaHref: "#courses",
-    accent: "#7C3AED",
-    bg: "from-[#1a0533] to-[#2d1b69]",
+    accent: "#00549C",
+    bg: "from-[#001B33] to-[#003B6D]",
     img: "photo-1677442135703-1787eea5ce01",
-    badge: "718 courses in Data Science",
+    badge: "Courses across multiple categories",
   },
   {
     id: 3,
-    tag: "Top instructors",
-    headline: "Design the world\nyou imagine.",
-    sub: "Award-winning designers teach Figma, branding, motion design, and product thinking.",
-    cta: "Start designing",
+    tag: "Learn from experts",
+    headline: "Turn knowledge\ninto real skills.",
+    sub: "Learn through practical lessons, hands-on projects, and expert-led courses designed to help you apply what you learn.",
+    cta: "Start learning",
     ctaHref: "#courses",
-    accent: "#EC4899",
-    bg: "from-[#1f0416] to-[#4a0728]",
+    accent: "#00549C",
+    bg: "from-[#001B33] to-[#003B6D]",
     img: "photo-1561070791-2526d30994b5",
-    badge: "934 Design courses",
+    badge: "Practical learning that works",
   },
 ];
-
 const TESTIMONIALS = [
   {
     name: "Marcus Reid",
@@ -99,30 +98,30 @@ function HeroCarousel() {
 
   return (
     <section
-      className={`relative overflow-hidden bg-linear-to-br ${slide.bg} text-white transition-all duration-700 min-h-125 md:min-h-150`}
+      className={`relative mx-4 mt-4 overflow-hidden rounded-[28px] bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mx-6 lg:mx-auto lg:max-w-375 min-h-125 md:min-h-150`}
     >
       {/* Background image */}
       <div className="absolute inset-0">
         <img
           src={`https://images.unsplash.com/${slide.img}?w=1400&h=640&fit=crop&auto=format&q=60`}
           alt=""
-          className={`w-full h-full object-cover transition-opacity duration-700 ${animating ? "opacity-0" : "opacity-20"}`}
+          className={`w-full h-full object-cover transition-opacity duration-700 ${animating ? "opacity-0" : "opacity-30"}`}
         />
-        <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-[#001B33]/90 via-[#003B6D]/65 to-[#003B6D]/30" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
+      <div className="relative max-w-375 mx-auto px-8 sm:px-10 md:px-12 lg:px-14 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
         <div
           className={`transition-all duration-500 ${animating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
         >
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-4 py-1.5 text-xs font-semibold mb-5 border border-white/20">
+          {/* <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-4 py-1.5 text-xs font-semibold mb-5 border border-white/20">
             <span
               className="w-2 h-2 rounded-full animate-pulse"
               style={{ backgroundColor: slide.accent }}
             />
             {slide.badge}
-          </div>
-          <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl leading-[1.04] tracking-tight mb-5 whitespace-pre-line">
+          </div> */}
+          <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl leading-[1.04] tracking-tight mb-5 whitespace-pre-line drop-shadow-sm">
             {slide.headline.split("\n").map((line, i) => (
               <span key={i}>
                 {i === 1 ? (
@@ -136,14 +135,14 @@ function HeroCarousel() {
               </span>
             ))}
           </h1>
-          <p className="text-white/70 text-base md:text-lg max-w-md leading-relaxed mb-8">
+          <p className="text-white/85 text-base md:text-lg font-medium max-w-lg leading-relaxed mb-8">
             {slide.sub}
           </p>
           <div className="flex flex-wrap gap-3">
             <a
               href={slide.ctaHref}
               className="px-7 py-3.5 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-105 active:scale-100"
-              style={{ backgroundColor: slide.accent, color: "#1B1F3B" }}
+              style={{ backgroundColor: slide.accent, color: "#FFFFFF" }}
             >
               {slide.cta}
             </a>
@@ -154,65 +153,66 @@ function HeroCarousel() {
               Start for free →
             </Link>
           </div>
-          <div className="flex items-center gap-6 mt-8 pt-6 border-t border-white/15">
-            {[
-              { v: "68K+", l: "Courses" },
-              { v: "2.4M", l: "Students" },
-              { v: "14K+", l: "Instructors" },
-            ].map((s) => (
-              <div key={s.l}>
-                <div className="font-display font-bold text-xl">{s.v}</div>
-                <div className="text-[11px] text-white/50">{s.l}</div>
-              </div>
-            ))}
-          </div>
+       <div className="flex items-center gap-6 mt-8 pt-6 border-t border-white/15">
+  {[
+    { v: "Expert", l: "Instructors" },
+    { v: "Practical", l: "Learning" },
+    { v: "Flexible", l: "Learning Pace" },
+  ].map((s) => (
+    <div key={s.l}>
+      <div className="font-display font-black text-[1rem]">{s.v}</div>
+      <div className="text-[14px] font-medium text-white/65">{s.l}</div>
+    </div>
+  ))}
+</div>
         </div>
 
         {/* Featured card */}
         <div
           className={`hidden md:flex flex-col items-end transition-all duration-500 ${animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"}`}
         >
-          <div className="relative w-80">
+          <div className="relative w-150 [perspective:1400px] md:scale-105">
             <div
-              className="absolute -inset-1 rounded-2xl opacity-40 blur-xl"
+              className="absolute -inset-2 rounded-2xl opacity-50 blur-xl"
               style={{ backgroundColor: slide.accent }}
             />
-            <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl text-gray-900">
+            <div className="absolute inset-x-5 -bottom-3 top-3 rounded-2xl border border-white/20 bg-white/10 [transform:translateZ(-28px)_rotateY(-4deg)]" />
+            <div className="relative overflow-hidden rounded-2xl bg-white text-gray-900 shadow-2xl ring-1 ring-white/50 [transform:rotateY(-3deg)_rotateX(1deg)] transition-transform duration-500 hover:[transform:rotateY(0deg)_rotateX(0deg)]">
               <img
                 src={`https://images.unsplash.com/${slide.img}?w=480&h=240&fit=crop&auto=format`}
                 alt="Featured"
-                className="w-full aspect-2/1 object-cover"
+                className="w-full aspect-2/1 object-cover contrast-110"
               />
               <div className="p-4">
                 <span
-                  className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
-                  style={{ backgroundColor: slide.accent, color: "#1B1F3B" }}
+                  className="text-xs font-black px-2.5 py-1 rounded-full"
+                  style={{ backgroundColor: slide.accent, color: "#FFFFFF" }}
                 >
                   {HERO_SLIDES[current].tag}
                 </span>
-                <p className="font-display font-bold text-sm mt-2 leading-snug">
+                <p className="font-display font-black text-base mt-2 leading-snug">
                   {slide.headline.replace("\n", " ")}
                 </p>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                   <div className="flex gap-0.5">
                     {[1, 2, 3, 4, 5].map((s) => (
-                      <span key={s} className="text-[#F5A623] text-xs">
+                      <span key={s} className="text-primary-blue text-xs">
                         ★
                       </span>
                     ))}
                   </div>
-                  <span className="font-bold text-[#1B1F3B]">From $9.99</span>
+                  <span className="font-black text-deep-blue">From $9.99</span>
                 </div>
               </div>
             </div>
 
             {/* Floating badge */}
-            <div className="absolute -bottom-4 -left-6 bg-white rounded-xl px-4 py-2.5 shadow-xl border border-gray-100 flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm">
+            <div className="absolute -bottom-4 -left-6 bg-white rounded-xl px-4 py-3 shadow-2xl border border-gray-100 flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-black text-sm">
                 ✓
               </div>
               <div>
-                <div className="text-xs font-bold text-gray-900">
+                <div className="text-xs font-black text-gray-900">
                   Certificate included
                 </div>
                 <div className="text-[10px] text-gray-400">
@@ -277,7 +277,12 @@ function HeroCarousel() {
 export default function Home() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") ?? "";
-  const [selectedCat, setSelectedCat] = useState("All");
+  const categoryParam = searchParams.get("category");
+  const [selectedCat, setSelectedCat] = useState(categoryParam ?? "All");
+
+  useEffect(() => {
+    setSelectedCat(categoryParam ?? "All");
+  }, [categoryParam]);
 
   const filtered = COURSES.filter((c) => {
     const matchQ =
@@ -294,7 +299,7 @@ export default function Home() {
 
       {/* Trusted by */}
       <section className="bg-white border-y border-gray-100 py-5 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-4">
+        <div className="max-w-375 mx-auto flex flex-col sm:flex-row items-center gap-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">
             Trusted by teams at
           </p>
@@ -312,7 +317,7 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
+      <section className="max-w-375 mx-auto px-4 sm:px-6 py-14">
         <div className="flex items-end justify-between mb-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-1">
@@ -362,7 +367,7 @@ export default function Home() {
       </section>
 
       {/* Promo Banner 1 — Sale */}
-      <section className="mx-4 sm:mx-6 lg:mx-auto max-w-7xl mb-10">
+      <section className="mx-4 sm:mx-6 lg:mx-auto max-w-375 mb-10">
         <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#1B1F3B] to-[#2d3360] text-white px-8 py-10 md:px-14 flex flex-col md:flex-row items-center gap-6">
           <div className="absolute right-0 top-0 h-full w-1/2 opacity-10">
             <img
@@ -406,7 +411,7 @@ export default function Home() {
       </section>
 
       {/* Courses */}
-      <section id="courses" className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+      <section id="courses" className="max-w-375 mx-auto px-4 sm:px-6 pb-16">
         <div className="flex items-end justify-between mb-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-1">
@@ -459,7 +464,7 @@ export default function Home() {
       </section>
 
       {/* Promo Banner 2 — Teach */}
-      <section className="mx-4 sm:mx-6 lg:mx-auto max-w-7xl mb-14">
+      <section className="mx-4 sm:mx-6 lg:mx-auto max-w-375 mb-14">
         <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#F5A623] to-[#f7bb56] text-[#1B1F3B] px-8 py-10 md:px-14 grid md:grid-cols-2 gap-8 items-center">
           <div>
             <p className="text-[#1B1F3B]/60 text-xs font-bold uppercase tracking-widest mb-2">
@@ -506,7 +511,7 @@ export default function Home() {
 
       {/* How it works */}
       <section className="bg-[#1B1F3B] text-white py-16 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-375 mx-auto">
           <div className="text-center mb-12">
             <p className="text-[#F5A623] text-xs font-bold uppercase tracking-widest mb-2">
               Get started
@@ -558,7 +563,7 @@ export default function Home() {
 
       {/* Testimonials */}
       <section className="py-16 px-4 sm:px-6 bg-[#F9F8F5]">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-375 mx-auto">
           <div className="text-center mb-10">
             <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-2">
               Student stories
