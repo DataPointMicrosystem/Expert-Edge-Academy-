@@ -110,7 +110,7 @@ function HeroCarousel() {
         <div className="absolute inset-0 bg-linear-to-r from-[#001B33]/90 via-[#003B6D]/65 to-[#003B6D]/30" />
       </div>
 
-      <div className="relative max-w-375 mx-auto px-8 sm:px-10 md:px-12 lg:px-14 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
+      <div className="relative max-w-375 mx-auto px-8 sm:px-10 md:px-12 lg:px-14 py-20 md:py-28 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
         <div
           className={`transition-all duration-500 ${animating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
         >
@@ -169,9 +169,9 @@ function HeroCarousel() {
 
         {/* Featured card */}
         <div
-          className={`hidden md:flex flex-col items-end transition-all duration-500 ${animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"}`}
+          className={`hidden lg:flex min-w-0 flex-col items-end transition-all duration-500 ${animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"}`}
         >
-          <div className="relative w-150 [perspective:1400px] md:scale-105">
+          <div className="relative w-full max-w-150 [perspective:1400px] lg:scale-105">
             <div
               className="absolute -inset-2 rounded-2xl opacity-50 blur-xl"
               style={{ backgroundColor: slide.accent }}
