@@ -24,7 +24,7 @@ const HERO_SLIDES = [
     cta: "Browse courses",
     ctaHref: "#courses",
     accent: "#00549C",
-    bg: "from-[#001B33] to-[#003B6D]",
+    bg: "from-[#001B33] to-[#333333]",
     img: "photo-1677442135703-1787eea5ce01",
     badge: "Courses across multiple categories",
   },
@@ -98,7 +98,7 @@ function HeroCarousel() {
 
   return (
     <section
-      className={`relative mx-4 mt-4 overflow-hidden rounded-[28px] bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mx-6 lg:mx-auto lg:max-w-375 min-h-125 md:min-h-150`}
+      className={`relative mx-auto mt-3 w-[calc(100%-1rem)] overflow-hidden rounded-2xl bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mt-4 sm:w-[calc(100%-3rem)] sm:rounded-[28px] lg:w-[100%-3rem] min-h-0 md:min-h-150`}
     >
       {/* Background image */}
       <div className="absolute inset-0">
@@ -110,7 +110,7 @@ function HeroCarousel() {
         <div className="absolute inset-0 bg-linear-to-r from-[#001B33]/90 via-[#003B6D]/65 to-[#003B6D]/30" />
       </div>
 
-      <div className="relative max-w-375 mx-auto px-8 sm:px-10 md:px-12 lg:px-14 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
+      <div className="relative max-w-375 mx-auto px-5 py-12 sm:px-10 sm:py-16 md:px-12 md:py-24 lg:px-14 lg:py-28 grid md:grid-cols-2 gap-10 items-center">
         <div
           className={`transition-all duration-500 ${animating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
         >
@@ -121,11 +121,11 @@ function HeroCarousel() {
             />
             {slide.badge}
           </div> */}
-          <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl leading-[1.04] tracking-tight mb-5 whitespace-pre-line drop-shadow-sm">
+          <h1 className="font-display font-black text-3xl leading-[1.08] tracking-tight mb-4 sm:text-5xl sm:mb-5 md:text-6xl whitespace-pre-line drop-shadow-sm">
             {slide.headline.split("\n").map((line, i) => (
               <span key={i}>
                 {i === 1 ? (
-                  <em className="not-italic" style={{ color: slide.accent }}>
+                  <em className="not-italic" style={{ color: "#ffff" }}>
                     {line}
                   </em>
                 ) : (
@@ -135,49 +135,51 @@ function HeroCarousel() {
               </span>
             ))}
           </h1>
-          <p className="text-white/85 text-base md:text-lg font-medium max-w-lg leading-relaxed mb-8">
+          <p className="text-white/85 text-sm leading-relaxed mb-6 sm:text-base md:text-lg md:mb-8 font-medium max-w-lg">
             {slide.sub}
           </p>
           <div className="flex flex-wrap gap-3">
             <a
               href={slide.ctaHref}
-              className="px-7 py-3.5 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-105 active:scale-100"
+              className="px-5 py-3 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-105 active:scale-100 sm:px-7 sm:py-3.5"
               style={{ backgroundColor: slide.accent, color: "#FFFFFF" }}
             >
               {slide.cta}
             </a>
             <Link
               to="/signup"
-              className="px-7 py-3.5 rounded-full font-bold text-sm border-2 border-white/30 hover:bg-white/10 transition-colors"
+              className="px-5 py-3 rounded-full font-bold text-sm border-2 border-white/30 hover:bg-white/10 transition-colors sm:px-7 sm:py-3.5"
             >
               Start for free →
             </Link>
           </div>
-       <div className="flex items-center gap-6 mt-8 pt-6 border-t border-white/15">
-  {[
-    { v: "Expert", l: "Instructors" },
-    { v: "Practical", l: "Learning" },
-    { v: "Flexible", l: "Learning Pace" },
-  ].map((s) => (
-    <div key={s.l}>
-      <div className="font-display font-black text-[1rem]">{s.v}</div>
-      <div className="text-[14px] font-medium text-white/65">{s.l}</div>
-    </div>
-  ))}
-</div>
-      </div>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-6 pt-5 border-t border-white/15 sm:gap-6 sm:mt-8 sm:pt-6">
+            {[
+              { v: "Expert", l: "Instructors" },
+              { v: "Practical", l: "Learning" },
+              { v: "Flexible", l: "Learning Pace" },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="font-display font-black text-[1rem]">{s.v}</div>
+                <div className="text-[14px] font-medium text-white/65">
+                  {s.l}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Featured card */}
         <div
-          className={`hidden md:flex flex-col items-end transition-all duration-500 ${animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"}`}
+          className={`hidden md:flex min-w-0 flex-col items-end transition-all duration-500 ${animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"}`}
         >
-          <div className="relative w-150 [perspective:1400px] md:scale-105">
+          <div className="relative w-full max-w-150 perspective-[1400px] md:scale-100 lg:scale-105">
             <div
               className="absolute -inset-2 rounded-2xl opacity-50 blur-xl"
               style={{ backgroundColor: slide.accent }}
             />
-            <div className="absolute inset-x-5 -bottom-3 top-3 rounded-2xl border border-white/20 bg-white/10 [transform:translateZ(-28px)_rotateY(-4deg)]" />
-            <div className="relative overflow-hidden rounded-2xl bg-white text-gray-900 shadow-2xl ring-1 ring-white/50 [transform:rotateY(-3deg)_rotateX(1deg)] transition-transform duration-500 hover:[transform:rotateY(0deg)_rotateX(0deg)]">
+            <div className="absolute inset-x-5 -bottom-3 top-3 rounded-2xl border border-white/20 bg-white/10 transform-[translateZ(-28px)_rotateY(-4deg)]" />
+            <div className="relative overflow-hidden rounded-2xl bg-white text-gray-900 shadow-2xl ring-1 ring-white/50 transform-[rotateY(-3deg)_rotateX(1deg)] transition-transform duration-500 hover:transform-[rotateY(0deg)_rotateX(0deg)]">
               <img
                 src={`https://images.unsplash.com/${slide.img}?w=480&h=240&fit=crop&auto=format`}
                 alt="Featured"
@@ -240,7 +242,7 @@ function HeroCarousel() {
         onClick={() =>
           go((current - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
         }
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center"
+        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center sm:left-4 sm:w-10 sm:h-10"
       >
         <svg
           className="w-5 h-5 text-white"
@@ -256,7 +258,7 @@ function HeroCarousel() {
       </button>
       <button
         onClick={() => go((current + 1) % HERO_SLIDES.length)}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center"
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center sm:right-4 sm:w-10 sm:h-10"
       >
         <svg
           className="w-5 h-5 text-white"
