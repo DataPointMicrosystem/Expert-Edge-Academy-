@@ -73,14 +73,140 @@ const COMPANIES = [
   "Stripe",
 ];
 
-const TOPIC_TABS = [
-  "Artificial Intelligence (AI)",
-  "Python",
-  "Microsoft Excel",
-  "AI Agents & Agentic AI",
-  "Digital Marketing",
-  "Amazon AWS",
+const ESSENTIAL_SKILLS = [
+  {
+    title: "Data Science",
+    image: "photo-1518770660439-4636190af475",
+    tint: "#d9d5d2",
+  },
+  {
+    title: "ChatGPT",
+    image: "photo-1677442135703-1787eea5ce01",
+    tint: "#19afe9",
+  },
+  {
+    title: "Prompt Engineering",
+    image: "photo-1556761175-b413da4baf72",
+    tint: "#57b987",
+  },
+  {
+    title: "UI/UX Design",
+    image: "photo-1561070791-2526d30994b5",
+    tint: "#f3c6d7",
+  },
+  {
+    title: "Digital Marketing",
+    image: "photo-1460925895917-afdab827c52f",
+    tint: "#f0b54a",
+  },
+  {
+    title: "Web Development",
+    image: "photo-1555066931-4636190af475",
+    tint: "#8eb8d8",
+  },
 ];
+
+function EssentialSkillsCarousel() {
+  const [page, setPage] = useState(0);
+  const pages = [ESSENTIAL_SKILLS.slice(0, 3), ESSENTIAL_SKILLS.slice(3)];
+
+  return (
+    <section className="overflow-hidden bg-white py-16 sm:py-20">
+      <div className="mx-auto grid w-[calc(100%_-_2rem)] max-w-375 gap-10 sm:w-[calc(100%_-_6rem)] lg:grid-cols-[minmax(220px,0.72fr)_minmax(0,2.28fr)] lg:items-center lg:gap-12">
+        <div className="max-w-xl lg:pt-2">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#015196]">
+            Build your edge
+          </p>
+          <h2 className="font-display text-3xl font-bold leading-tight text-[#003B6D] sm:text-4xl md:text-5xl">
+            Learn essential career and life skills
+          </h2>
+          <p className="mt-4 max-w-md text-base leading-relaxed text-[#7c819e] sm:text-lg">
+            ExpertEdge helps you build in-demand skills fast and advance your
+            career in a changing job market.
+          </p>
+        </div>
+
+        <div className="min-w-0">
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{ transform: `translateX(-${page * 100}%)` }}
+            >
+              {pages.map((skills, pageIndex) => (
+                <div
+                  key={pageIndex}
+                  className="grid min-w-full grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5"
+                >
+                  {skills.map((skill) => (
+                    <Link
+                      key={skill.title}
+                      to="#courses"
+                      className="group relative aspect-[0.91] min-w-0 overflow-hidden rounded-[22px] p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1 sm:aspect-[0.72] sm:p-5"
+                      style={{ backgroundColor: skill.tint }}
+                    >
+                      <img
+                        src={`https://images.unsplash.com/${skill.image}?w=900&h=900&fit=crop&auto=format&q=80`}
+                        alt=""
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/5" />
+                      <div className="absolute inset-x-4 bottom-4 flex min-h-28 items-center justify-between rounded-xl bg-white px-5 py-5 shadow-lg sm:inset-x-5 sm:bottom-5">
+                        <span className="text-xl font-medium text-[#292b45] sm:text-2xl">
+                          {skill.title}
+                        </span>
+                        <span className="ml-3 text-3xl font-light text-[#015196] transition-transform group-hover:translate-x-1">
+                          <span aria-hidden="true">→</span>
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 flex items-center justify-center gap-5">
+            <button
+              type="button"
+              aria-label="Previous essential skills"
+              onClick={() =>
+                setPage(
+                  (current) => (current - 1 + pages.length) % pages.length,
+                )
+              }
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl text-[#292b45] shadow-[0_6px_24px_rgba(41,43,69,0.12)] transition hover:-translate-x-0.5 hover:shadow-lg"
+            >
+              <span aria-hidden="true">←</span>
+            </button>
+            <div
+              className="flex items-center gap-2"
+              aria-label="Carousel pages"
+            >
+              {pages.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  aria-label={`Go to skills page ${index + 1}`}
+                  aria-current={page === index}
+                  onClick={() => setPage(index)}
+                  className={`h-4 rounded-full transition-all ${page === index ? "w-14 bg-[#015196]" : "w-4 bg-[#e8e8f1] hover:bg-[#c7c7d8]"}`}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              aria-label="Next essential skills"
+              onClick={() => setPage((current) => (current + 1) % pages.length)}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl text-[#292b45] shadow-[0_6px_24px_rgba(41,43,69,0.12)] transition hover:translate-x-0.5 hover:shadow-lg"
+            >
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function HeroCarousel() {
   const [current, setCurrent] = useState(0);
@@ -107,7 +233,7 @@ function HeroCarousel() {
 
   return (
     <section
-      className={`relative mx-auto mt-3 w-[calc(100%-1rem)] overflow-hidden rounded-2xl bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mt-4 sm:w-[calc(100%-3rem)] sm:rounded-[28px] lg:w-[100%-3rem] min-h-0 md:min-h-150`}
+      className={`relative mx-auto mt-3 w-[calc(100%_-_1rem)] overflow-hidden rounded-2xl bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mt-4 sm:w-[calc(100%_-_3rem)] sm:rounded-[28px] min-h-0 md:min-h-150`}
     >
       {/* Background image */}
       <div className="absolute inset-0">
@@ -303,6 +429,12 @@ export default function Home() {
     const matchCat = selectedCat === "All" || c.category === selectedCat;
     return matchQ && matchCat;
   });
+  const trendingCourses = [...COURSES]
+    .sort(
+      (firstCourse, secondCourse) =>
+        secondCourse.enrolled - firstCourse.enrolled,
+    )
+    .slice(0, 4);
 
   return (
     <div className="min-h-screen bg-[#F9F8F5]">
@@ -310,7 +442,7 @@ export default function Home() {
 
       {/* Trusted by */}
       <section className="bg-white border-y border-gray-100 py-5 px-4 sm:px-6">
-        <div className="max-w-250 mx-auto flex flex-col sm:flex-row items-center gap-4">
+        <div className="mx-auto w-[calc(100%_-_1rem)] flex flex-col sm:w-[calc(100%_-_3rem)] sm:flex-row items-center gap-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">
             Trusted by teams at
           </p>
@@ -328,15 +460,16 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section className="max-w-375 mx-auto px-4 py-14 sm:px-6 lg:py-16">
+      <section className="mx-auto w-[calc(100%_-_1rem)] py-14 sm:w-[calc(100%_-_3rem)] lg:py-16">
         <div className="mb-8 flex items-end justify-between sm:mb-9">
           <div>
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5A623]">
-              Browse by topic
-            </p>
-            <h2 className="font-display text-3xl font-bold leading-none text-[#1B1F3B] sm:text-[32px]">
-              Top categories
+            <h2 className="mb-2 text-[28px] font-bold uppercase tracking-[0.16em] text-[#1B1F3B]">
+              Learn skills that create opportunities
             </h2>
+            <p className="font-display text-3xl leading-none text-[#1B1F3B] sm:text-[18px]">
+              From essential professional skills to in-demand technical
+              knowledge, ExpertEdge Academy helps you prepare for what's next.
+            </p>
           </div>
           <button
             onClick={() => setSelectedCat("All")}
@@ -345,54 +478,47 @@ export default function Home() {
             View all →
           </button>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-8 md:gap-3.5">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.name}
-              onClick={() => {
-                setSelectedCat(cat.name === selectedCat ? "All" : cat.name);
-                setTimeout(
-                  () =>
-                    document
-                      .getElementById("courses")
-                      ?.scrollIntoView({ behavior: "smooth" }),
-                  50,
-                );
-              }}
-              className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border bg-white px-2 py-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                selectedCat === cat.name
-                  ? "border-[#F5A623] bg-[#fffaf0] shadow-md"
-                  : "border-[#e9edf2] hover:border-[#d9dee6]"
-              }`}
-            >
-              <span className="text-[25px] leading-none" aria-hidden="true">
-                {cat.icon}
-              </span>
-              <span className="text-[11px] font-semibold leading-tight text-[#071b3a]">
-                {cat.name}
-              </span>
-              <span className="text-[10px] font-medium text-[#9aa3b1]">
-                {cat.count.toLocaleString()}
-              </span>
-            </button>
-          ))}
-        </div>
-
         <nav
           aria-label="Popular topics"
           className="mt-12 overflow-x-auto border-b border-[#cfd4dc]"
         >
           <div className="flex min-w-max items-end gap-0">
-            {TOPIC_TABS.map((topic, index) => (
+            <button
+              onClick={() => {
+                setSelectedCat("All");
+                document
+                  .getElementById("courses")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className={`whitespace-nowrap border-b-2 px-4 pb-3 pt-1 text-sm transition-colors first:pl-1 sm:px-5 ${
+                selectedCat === "All"
+                  ? "border-[#1b1f3b] font-semibold text-[#071b3a]"
+                  : "border-transparent font-normal text-[#71809a] hover:text-[#071b3a]"
+              }`}
+            >
+              All
+            </button>
+            {CATEGORIES.map((category) => (
               <button
-                key={topic}
+                key={category.name}
+                onClick={() => {
+                  setSelectedCat(
+                    category.name === selectedCat ? "All" : category.name,
+                  );
+                  document
+                    .getElementById("courses")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
                 className={`whitespace-nowrap border-b-2 px-4 pb-3 pt-1 text-sm transition-colors first:pl-1 sm:px-5 ${
-                  index === 0
+                  selectedCat === category.name
                     ? "border-[#1b1f3b] font-semibold text-[#071b3a]"
                     : "border-transparent font-normal text-[#71809a] hover:text-[#071b3a]"
                 }`}
               >
-                {topic}
+                {category.name}
+                <span className="ml-1 text-xs text-[#9aa3b1]">
+                  ({category.count.toLocaleString()})
+                </span>
               </button>
             ))}
           </div>
@@ -400,8 +526,8 @@ export default function Home() {
       </section>
 
       {/* Promo Banner 1 — Sale */}
-      <section className="mx-4 sm:mx-6 lg:mx-auto max-w-375 mb-10">
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#1B1F3B] to-[#2d3360] text-white px-8 py-10 md:px-14 flex flex-col md:flex-row items-center gap-6">
+      <section className="mx-auto w-[calc(100%_-_1rem)] mb-10 sm:w-[calc(100%_-_3rem)]">
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#003B6D] to-[#015196] text-white px-8 py-10 md:px-14 flex flex-col md:flex-row items-center gap-6">
           <div className="absolute right-0 top-0 h-full w-1/2 opacity-10">
             <img
               src="https://images.unsplash.com/photo-1543269664-76bc3997d9ea?w=600&h=300&fit=crop&auto=format"
@@ -410,11 +536,11 @@ export default function Home() {
             />
           </div>
           <div className="relative z-10 flex-1">
-            <p className="text-[#F5A623] text-xs font-bold uppercase tracking-widest mb-2">
+            <p className="text-[#B9D7EE] text-xs font-bold uppercase tracking-widest mb-2">
               🔥 Weekend sale
             </p>
             <h2 className="font-display font-black text-3xl md:text-4xl mb-2">
-              All courses <span className="text-[#F5A623]">$9.99</span>
+              All courses <span className="text-white">$9.99</span>
             </h2>
             <p className="text-white/60 text-sm max-w-sm">
               Sale ends Sunday. Over 68,000 courses to choose from.
@@ -435,7 +561,7 @@ export default function Home() {
             </div>
             <a
               href="#courses"
-              className="px-6 py-2.5 rounded-full bg-[#F5A623] text-[#1B1F3B] font-bold text-sm hover:opacity-90 transition-opacity"
+              className="px-6 py-2.5 rounded-full bg-white text-[#003B6D] font-bold text-sm hover:bg-[#DCECF7] transition-colors"
             >
               Claim your deal →
             </a>
@@ -444,12 +570,15 @@ export default function Home() {
       </section>
 
       {/* Courses */}
-      <section id="courses" className="max-w-375 mx-auto px-4 sm:px-6 pb-16">
+      <section
+        id="courses"
+        className="mx-auto w-[calc(100%_-_1rem)] pb-16 sm:w-[calc(100%_-_3rem)]"
+      >
         <div className="flex items-end justify-between mb-8">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-1">
+            {/* <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-1">
               {selectedCat === "All" ? "Most popular" : selectedCat}
-            </p>
+            </p> */}
             <h2 className="font-display font-bold text-3xl text-[#1B1F3B]">
               {query
                 ? `Results for "${query}"`
@@ -482,25 +611,29 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filtered.map((c) => (
-              <CourseCard key={c.id} course={c} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {filtered.map((c, index) => (
+              <CourseCard
+                key={c.id}
+                course={c}
+                popoverSide={index % 4 === 3 ? "left" : "right"}
+              />
             ))}
           </div>
         )}
 
         <div className="mt-10 text-center">
-          <button className="px-8 py-3.5 rounded-full border-2 border-[#1B1F3B] text-[#1B1F3B] font-bold text-sm hover:bg-[#1B1F3B] hover:text-white transition-all">
+          <button className="px-8 py-3.5 rounded-full border-2 border-[#015196] text-[#015196] font-bold text-sm hover:bg-[#003B6D] hover:text-white transition-all">
             View all 68,000+ courses
           </button>
         </div>
       </section>
 
       {/* Promo Banner 2 — Teach */}
-      <section className="mx-4 sm:mx-6 lg:mx-auto max-w-375 mb-14">
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#F5A623] to-[#f7bb56] text-[#1B1F3B] px-8 py-10 md:px-14 grid md:grid-cols-2 gap-8 items-center">
+      <section className="mx-auto w-[calc(100%_-_1rem)] mb-14 sm:w-[calc(100%_-_3rem)]">
+        <div className="relative overflow-hidden rounded-3xl bg-[#9ca3af]  text-[#003B6D] px-8 py-10 md:px-14 grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <p className="text-[#1B1F3B]/60 text-xs font-bold uppercase tracking-widest mb-2">
+            <p className="text-[#003B6D]/60 text-xs font-bold uppercase tracking-widest mb-2">
               💡 Become an instructor
             </p>
             <h2 className="font-display font-black text-3xl md:text-4xl mb-3">
@@ -508,13 +641,13 @@ export default function Home() {
               <br />
               Earn what you deserve.
             </h2>
-            <p className="text-[#1B1F3B]/70 text-sm mb-6 max-w-sm">
+            <p className="text-[#003B6D]/70 text-sm mb-6 max-w-sm">
               Join 14,000+ instructors earning passive income. Keep 70% of every
               sale. No experience required.
             </p>
             <Link
               to="/signup"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#1B1F3B] text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-lg"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#003B6D] text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-lg"
             >
               Start teaching today →
             </Link>
@@ -530,7 +663,7 @@ export default function Home() {
                 <div className="text-[10px] text-gray-400">
                   Top instructor this month
                 </div>
-                <div className="font-display font-bold text-lg text-[#1B1F3B]">
+                <div className="font-display font-bold text-lg text-[#003B6D]">
                   $12,840
                 </div>
                 <div className="text-xs text-green-600 font-semibold">
@@ -542,9 +675,38 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trending courses */}
+      <section className="mx-auto w-[calc(100%_-_1rem)] py-16 sm:w-[calc(100%_-_3rem)]">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-[#015196]">
+              Most Popular
+            </p>
+            <h2 className="font-display text-3xl font-bold text-[#1B1F3B] md:text-4xl">
+              Trending courses
+            </h2>
+          </div>
+          <a
+            href="#courses"
+            className="hidden text-sm font-semibold text-[#015196] transition-colors hover:text-[#003B6D] sm:block"
+          >
+            View all courses →
+          </a>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {trendingCourses.map((course, index) => (
+            <CourseCard
+              key={course.id}
+              course={course}
+              popoverSide={index % 4 === 3 ? "left" : "right"}
+            />
+          ))}
+        </div>
+      </section>
+
       {/* How it works */}
-      <section className="bg-[#1B1F3B] text-white py-16 px-4 sm:px-6">
-        <div className="max-w-375 mx-auto">
+      <section className="bg-linear-to-br from-[#003B6D] to-[#015196] text-white py-16 px-4 sm:px-6">
+        <div className="mx-auto w-[calc(100%_-_1rem)] sm:w-[calc(100%_-_3rem)]">
           <div className="text-center mb-12">
             <p className="text-[#F5A623] text-xs font-bold uppercase tracking-widest mb-2">
               Get started
@@ -576,7 +738,7 @@ export default function Home() {
             ].map((s) => (
               <div
                 key={s.step}
-                className="relative bg-white/5 rounded-2xl p-7 border border-white/10 hover:bg-white/8 transition-colors"
+                className="relative bg-white/10 rounded-2xl p-7 border border-white/15 hover:bg-white/15 transition-colors"
               >
                 <span className="absolute top-5 right-6 font-display font-black text-5xl text-white/8 select-none">
                   {s.step}
@@ -594,15 +756,17 @@ export default function Home() {
         </div>
       </section>
 
+      <EssentialSkillsCarousel />
+
       {/* Testimonials */}
       <section className="py-16 px-4 sm:px-6 bg-[#F9F8F5]">
-        <div className="max-w-375 mx-auto">
+        <div className="mx-auto w-[calc(100%_-_1rem)] sm:w-[calc(100%_-_3rem)]">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-2">
+            {/* <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-2">
               Student stories
-            </p>
+            </p> */}
             <h2 className="font-display font-bold text-3xl md:text-4xl text-[#1B1F3B]">
-              Real results, real people
+              Join a community of learners building a better future
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
@@ -645,7 +809,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-5xl mb-5">🎓</div>
           <h2 className="font-display font-black text-4xl md:text-5xl mb-4">
-            Your next skill is <span className="text-[#F5A623]">waiting.</span>
+            Your next skill is waiting.
           </h2>
           <p className="text-white/60 mb-8 text-base">
             Join 2.4 million learners already growing their careers on
@@ -654,13 +818,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/signup"
-              className="px-8 py-4 rounded-full bg-[#F5A623] text-[#1B1F3B] font-bold hover:opacity-90 transition-opacity shadow-lg"
+              className="px-8 py-4 rounded-full bg-[#015196] text-white font-bold hover:bg-[#003B6D] transition-colors shadow-lg"
             >
               Get started for free
             </Link>
             <a
               href="#courses"
-              className="px-8 py-4 rounded-full border border-white/25 hover:bg-white/10 transition-colors font-semibold"
+              className="px-8 py-4 rounded-full border border-[#015196] text-white hover:bg-[#015196]/20 transition-colors font-semibold"
             >
               Browse courses
             </a>
