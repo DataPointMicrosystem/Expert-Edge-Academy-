@@ -73,6 +73,15 @@ const COMPANIES = [
   "Stripe",
 ];
 
+const TOPIC_TABS = [
+  "Artificial Intelligence (AI)",
+  "Python",
+  "Microsoft Excel",
+  "AI Agents & Agentic AI",
+  "Digital Marketing",
+  "Amazon AWS",
+];
+
 function HeroCarousel() {
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
@@ -171,9 +180,9 @@ function HeroCarousel() {
 
         {/* Featured card */}
         <div
-          className={`hidden md:flex min-w-0 flex-col items-end transition-all duration-500 ${animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"}`}
+          className={`hidden lg:flex min-w-0 flex-col items-end transition-all duration-500 ${animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"}`}
         >
-          <div className="relative w-full max-w-150 perspective-[1400px] md:scale-100 lg:scale-105">
+          <div className="relative w-full max-w-150 [perspective:1400px] lg:scale-105">
             <div
               className="absolute -inset-2 rounded-2xl opacity-50 blur-xl"
               style={{ backgroundColor: slide.accent }}
@@ -301,7 +310,7 @@ export default function Home() {
 
       {/* Trusted by */}
       <section className="bg-white border-y border-gray-100 py-5 px-4 sm:px-6">
-        <div className="max-w-375 mx-auto flex flex-col sm:flex-row items-center gap-4">
+        <div className="max-w-250 mx-auto flex flex-col sm:flex-row items-center gap-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">
             Trusted by teams at
           </p>
@@ -319,13 +328,13 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section className="max-w-375 mx-auto px-4 sm:px-6 py-14">
-        <div className="flex items-end justify-between mb-8">
+      <section className="max-w-375 mx-auto px-4 py-14 sm:px-6 lg:py-16">
+        <div className="mb-8 flex items-end justify-between sm:mb-9">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-1">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5A623]">
               Browse by topic
             </p>
-            <h2 className="font-display font-bold text-3xl text-[#1B1F3B]">
+            <h2 className="font-display text-3xl font-bold leading-none text-[#1B1F3B] sm:text-[32px]">
               Top categories
             </h2>
           </div>
@@ -336,7 +345,7 @@ export default function Home() {
             View all →
           </button>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-8 md:gap-3.5">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.name}
@@ -350,22 +359,44 @@ export default function Home() {
                   50,
                 );
               }}
-              className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all text-center hover:shadow-md ${
+              className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border bg-white px-2 py-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md ${
                 selectedCat === cat.name
-                  ? "border-[#F5A623] bg-[#F5A623]/10 shadow-md"
-                  : "border-gray-100 bg-white hover:border-gray-200"
+                  ? "border-[#F5A623] bg-[#fffaf0] shadow-md"
+                  : "border-[#e9edf2] hover:border-[#d9dee6]"
               }`}
             >
-              <span className="text-2xl">{cat.icon}</span>
-              <span className="text-[11px] font-semibold leading-tight text-gray-800">
+              <span className="text-[25px] leading-none" aria-hidden="true">
+                {cat.icon}
+              </span>
+              <span className="text-[11px] font-semibold leading-tight text-[#071b3a]">
                 {cat.name}
               </span>
-              <span className="text-[10px] text-gray-400">
+              <span className="text-[10px] font-medium text-[#9aa3b1]">
                 {cat.count.toLocaleString()}
               </span>
             </button>
           ))}
         </div>
+
+        <nav
+          aria-label="Popular topics"
+          className="mt-12 overflow-x-auto border-b border-[#cfd4dc]"
+        >
+          <div className="flex min-w-max items-end gap-0">
+            {TOPIC_TABS.map((topic, index) => (
+              <button
+                key={topic}
+                className={`whitespace-nowrap border-b-2 px-4 pb-3 pt-1 text-sm transition-colors first:pl-1 sm:px-5 ${
+                  index === 0
+                    ? "border-[#1b1f3b] font-semibold text-[#071b3a]"
+                    : "border-transparent font-normal text-[#71809a] hover:text-[#071b3a]"
+                }`}
+              >
+                {topic}
+              </button>
+            ))}
+          </div>
+        </nav>
       </section>
 
       {/* Promo Banner 1 — Sale */}
