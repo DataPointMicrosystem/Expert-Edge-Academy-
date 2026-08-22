@@ -24,7 +24,7 @@ const HERO_SLIDES = [
     cta: "Browse courses",
     ctaHref: "#courses",
     accent: "#00549C",
-    bg: "from-[#001B33] to-[#003B6D]",
+    bg: "from-[#001B33] to-[#333333]",
     img: "photo-1677442135703-1787eea5ce01",
     badge: "Courses across multiple categories",
   },
@@ -73,6 +73,15 @@ const COMPANIES = [
   "Stripe",
 ];
 
+const TOPIC_TABS = [
+  "Artificial Intelligence (AI)",
+  "Python",
+  "Microsoft Excel",
+  "AI Agents & Agentic AI",
+  "Digital Marketing",
+  "Amazon AWS",
+];
+
 function HeroCarousel() {
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
@@ -98,7 +107,7 @@ function HeroCarousel() {
 
   return (
     <section
-      className={`relative mx-4 mt-4 overflow-hidden rounded-[28px] bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mx-6 lg:mx-auto lg:max-w-375 min-h-125 md:min-h-150`}
+      className={`relative mx-auto mt-3 w-[calc(100%-1rem)] overflow-hidden rounded-2xl bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mt-4 sm:w-[calc(100%-3rem)] sm:rounded-[28px] lg:w-[100%-3rem] min-h-0 md:min-h-150`}
     >
       {/* Background image */}
       <div className="absolute inset-0">
@@ -110,7 +119,7 @@ function HeroCarousel() {
         <div className="absolute inset-0 bg-linear-to-r from-[#001B33]/90 via-[#003B6D]/65 to-[#003B6D]/30" />
       </div>
 
-      <div className="relative max-w-375 mx-auto px-8 sm:px-10 md:px-12 lg:px-14 py-20 md:py-28 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+      <div className="relative max-w-375 mx-auto px-5 py-12 sm:px-10 sm:py-16 md:px-12 md:py-24 lg:px-14 lg:py-28 grid md:grid-cols-2 gap-10 items-center">
         <div
           className={`transition-all duration-500 ${animating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
         >
@@ -121,11 +130,11 @@ function HeroCarousel() {
             />
             {slide.badge}
           </div> */}
-          <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl leading-[1.04] tracking-tight mb-5 whitespace-pre-line drop-shadow-sm">
+          <h1 className="font-display font-black text-3xl leading-[1.08] tracking-tight mb-4 sm:text-5xl sm:mb-5 md:text-6xl whitespace-pre-line drop-shadow-sm">
             {slide.headline.split("\n").map((line, i) => (
               <span key={i}>
                 {i === 1 ? (
-                  <em className="not-italic" style={{ color: slide.accent }}>
+                  <em className="not-italic" style={{ color: "#ffff" }}>
                     {line}
                   </em>
                 ) : (
@@ -135,37 +144,39 @@ function HeroCarousel() {
               </span>
             ))}
           </h1>
-          <p className="text-white/85 text-base md:text-lg font-medium max-w-lg leading-relaxed mb-8">
+          <p className="text-white/85 text-sm leading-relaxed mb-6 sm:text-base md:text-lg md:mb-8 font-medium max-w-lg">
             {slide.sub}
           </p>
           <div className="flex flex-wrap gap-3">
             <a
               href={slide.ctaHref}
-              className="px-7 py-3.5 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-105 active:scale-100"
+              className="px-5 py-3 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-105 active:scale-100 sm:px-7 sm:py-3.5"
               style={{ backgroundColor: slide.accent, color: "#FFFFFF" }}
             >
               {slide.cta}
             </a>
             <Link
               to="/signup"
-              className="px-7 py-3.5 rounded-full font-bold text-sm border-2 border-white/30 hover:bg-white/10 transition-colors"
+              className="px-5 py-3 rounded-full font-bold text-sm border-2 border-white/30 hover:bg-white/10 transition-colors sm:px-7 sm:py-3.5"
             >
               Start for free →
             </Link>
           </div>
-       <div className="flex items-center gap-6 mt-8 pt-6 border-t border-white/15">
-  {[
-    { v: "Expert", l: "Instructors" },
-    { v: "Practical", l: "Learning" },
-    { v: "Flexible", l: "Learning Pace" },
-  ].map((s) => (
-    <div key={s.l}>
-      <div className="font-display font-black text-[1rem]">{s.v}</div>
-      <div className="text-[14px] font-medium text-white/65">{s.l}</div>
-    </div>
-  ))}
-</div>
-      </div>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-6 pt-5 border-t border-white/15 sm:gap-6 sm:mt-8 sm:pt-6">
+            {[
+              { v: "Expert", l: "Instructors" },
+              { v: "Practical", l: "Learning" },
+              { v: "Flexible", l: "Learning Pace" },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="font-display font-black text-[1rem]">{s.v}</div>
+                <div className="text-[14px] font-medium text-white/65">
+                  {s.l}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Featured card */}
         <div
@@ -176,8 +187,8 @@ function HeroCarousel() {
               className="absolute -inset-2 rounded-2xl opacity-50 blur-xl"
               style={{ backgroundColor: slide.accent }}
             />
-            <div className="absolute inset-x-5 -bottom-3 top-3 rounded-2xl border border-white/20 bg-white/10 [transform:translateZ(-28px)_rotateY(-4deg)]" />
-            <div className="relative overflow-hidden rounded-2xl bg-white text-gray-900 shadow-2xl ring-1 ring-white/50 [transform:rotateY(-3deg)_rotateX(1deg)] transition-transform duration-500 hover:[transform:rotateY(0deg)_rotateX(0deg)]">
+            <div className="absolute inset-x-5 -bottom-3 top-3 rounded-2xl border border-white/20 bg-white/10 transform-[translateZ(-28px)_rotateY(-4deg)]" />
+            <div className="relative overflow-hidden rounded-2xl bg-white text-gray-900 shadow-2xl ring-1 ring-white/50 transform-[rotateY(-3deg)_rotateX(1deg)] transition-transform duration-500 hover:transform-[rotateY(0deg)_rotateX(0deg)]">
               <img
                 src={`https://images.unsplash.com/${slide.img}?w=480&h=240&fit=crop&auto=format`}
                 alt="Featured"
@@ -240,7 +251,7 @@ function HeroCarousel() {
         onClick={() =>
           go((current - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
         }
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center"
+        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center sm:left-4 sm:w-10 sm:h-10"
       >
         <svg
           className="w-5 h-5 text-white"
@@ -256,7 +267,7 @@ function HeroCarousel() {
       </button>
       <button
         onClick={() => go((current + 1) % HERO_SLIDES.length)}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center"
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center sm:right-4 sm:w-10 sm:h-10"
       >
         <svg
           className="w-5 h-5 text-white"
@@ -299,7 +310,7 @@ export default function Home() {
 
       {/* Trusted by */}
       <section className="bg-white border-y border-gray-100 py-5 px-4 sm:px-6">
-        <div className="max-w-375 mx-auto flex flex-col sm:flex-row items-center gap-4">
+        <div className="max-w-250 mx-auto flex flex-col sm:flex-row items-center gap-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">
             Trusted by teams at
           </p>
@@ -317,13 +328,13 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section className="max-w-375 mx-auto px-4 sm:px-6 py-14">
-        <div className="flex items-end justify-between mb-8">
+      <section className="max-w-375 mx-auto px-4 py-14 sm:px-6 lg:py-16">
+        <div className="mb-8 flex items-end justify-between sm:mb-9">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-1">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5A623]">
               Browse by topic
             </p>
-            <h2 className="font-display font-bold text-3xl text-[#1B1F3B]">
+            <h2 className="font-display text-3xl font-bold leading-none text-[#1B1F3B] sm:text-[32px]">
               Top categories
             </h2>
           </div>
@@ -334,7 +345,7 @@ export default function Home() {
             View all →
           </button>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-8 md:gap-3.5">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.name}
@@ -348,22 +359,44 @@ export default function Home() {
                   50,
                 );
               }}
-              className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all text-center hover:shadow-md ${
+              className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border bg-white px-2 py-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md ${
                 selectedCat === cat.name
-                  ? "border-[#F5A623] bg-[#F5A623]/10 shadow-md"
-                  : "border-gray-100 bg-white hover:border-gray-200"
+                  ? "border-[#F5A623] bg-[#fffaf0] shadow-md"
+                  : "border-[#e9edf2] hover:border-[#d9dee6]"
               }`}
             >
-              <span className="text-2xl">{cat.icon}</span>
-              <span className="text-[11px] font-semibold leading-tight text-gray-800">
+              <span className="text-[25px] leading-none" aria-hidden="true">
+                {cat.icon}
+              </span>
+              <span className="text-[11px] font-semibold leading-tight text-[#071b3a]">
                 {cat.name}
               </span>
-              <span className="text-[10px] text-gray-400">
+              <span className="text-[10px] font-medium text-[#9aa3b1]">
                 {cat.count.toLocaleString()}
               </span>
             </button>
           ))}
         </div>
+
+        <nav
+          aria-label="Popular topics"
+          className="mt-12 overflow-x-auto border-b border-[#cfd4dc]"
+        >
+          <div className="flex min-w-max items-end gap-0">
+            {TOPIC_TABS.map((topic, index) => (
+              <button
+                key={topic}
+                className={`whitespace-nowrap border-b-2 px-4 pb-3 pt-1 text-sm transition-colors first:pl-1 sm:px-5 ${
+                  index === 0
+                    ? "border-[#1b1f3b] font-semibold text-[#071b3a]"
+                    : "border-transparent font-normal text-[#71809a] hover:text-[#071b3a]"
+                }`}
+              >
+                {topic}
+              </button>
+            ))}
+          </div>
+        </nav>
       </section>
 
       {/* Promo Banner 1 — Sale */}
