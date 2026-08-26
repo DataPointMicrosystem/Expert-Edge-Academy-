@@ -112,7 +112,7 @@ function EssentialSkillsCarousel() {
 
   return (
     <section className="overflow-hidden bg-white py-16 sm:py-20">
-      <div className="mx-auto grid w-[calc(100%_-_2rem)] max-w-375 gap-10 sm:w-[calc(100%_-_6rem)] lg:grid-cols-[minmax(220px,0.72fr)_minmax(0,2.28fr)] lg:items-center lg:gap-12">
+      <div className="mx-auto grid w-[90%] max-w-375 gap-10 lg:grid-cols-[minmax(220px,0.72fr)_minmax(0,2.28fr)] lg:items-center lg:gap-12">
         <div className="max-w-xl lg:pt-2">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#015196]">
             Build your edge
@@ -233,7 +233,7 @@ function HeroCarousel() {
 
   return (
     <section
-      className={`relative mx-auto mt-3 w-[calc(100%_-_1rem)] overflow-hidden rounded-2xl bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mt-4 sm:w-[calc(100%_-_3rem)] sm:rounded-[28px] min-h-0 md:min-h-150`}
+      className={`relative mx-auto mt-3 w-[90%] overflow-hidden rounded-2xl bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mt-4 sm:rounded-[28px] min-h-0 md:min-h-150`}
     >
       {/* Background image */}
       <div className="absolute inset-0">
@@ -441,8 +441,8 @@ export default function Home() {
       <HeroCarousel />
 
       {/* Trusted by */}
-      <section className="bg-white border-y border-gray-100 py-5 px-4 sm:px-6">
-        <div className="mx-auto w-[calc(100%_-_1rem)] flex flex-col sm:w-[calc(100%_-_3rem)] sm:flex-row items-center gap-4">
+      <section className="bg-white border-y border-gray-100 py-5">
+        <div className="mx-auto w-[90%] flex flex-col sm:flex-row items-center gap-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">
             Trusted by teams at
           </p>
@@ -460,7 +460,7 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section className="mx-auto w-[calc(100%_-_1rem)] py-14 sm:w-[calc(100%_-_3rem)] lg:py-16">
+      <section className="mx-auto w-[90%] py-14 lg:py-16">
         <div className="mb-8 flex items-end justify-between sm:mb-9">
           <div>
             <h2 className="mb-2 text-[28px] font-bold uppercase tracking-[0.16em] text-[#1B1F3B]">
@@ -480,9 +480,9 @@ export default function Home() {
         </div>
         <nav
           aria-label="Popular topics"
-          className="mt-12 overflow-x-auto border-b border-[#cfd4dc]"
+          className="mt-12 overflow-hidden border-b border-[#cfd4dc]"
         >
-          <div className="flex min-w-max items-end gap-0">
+          <div className="flex flex-wrap items-end gap-0">
             <button
               onClick={() => {
                 setSelectedCat("All");
@@ -526,7 +526,7 @@ export default function Home() {
       </section>
 
       {/* Promo Banner 1 — Sale */}
-      <section className="mx-auto w-[calc(100%_-_1rem)] mb-10 sm:w-[calc(100%_-_3rem)]">
+      <section className="mx-auto w-[90%] mb-10">
         <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#003B6D] to-[#015196] text-white px-8 py-10 md:px-14 flex flex-col md:flex-row items-center gap-6">
           <div className="absolute right-0 top-0 h-full w-1/2 opacity-10">
             <img
@@ -570,10 +570,7 @@ export default function Home() {
       </section>
 
       {/* Courses */}
-      <section
-        id="courses"
-        className="mx-auto w-[calc(100%_-_1rem)] pb-16 sm:w-[calc(100%_-_3rem)]"
-      >
+      <section id="courses" className="mx-auto w-[90%] pb-16">
         <div className="flex items-end justify-between mb-8">
           <div>
             {/* <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-1">
@@ -630,7 +627,7 @@ export default function Home() {
       </section>
 
       {/* Promo Banner 2 — Teach */}
-      <section className="mx-auto w-[calc(100%_-_1rem)] mb-14 sm:w-[calc(100%_-_3rem)]">
+      <section className="mx-auto w-[90%] mb-14">
         <div className="relative overflow-hidden rounded-3xl bg-[#9ca3af]  text-[#003B6D] px-8 py-10 md:px-14 grid md:grid-cols-2 gap-8 items-center">
           <div>
             <p className="text-[#003B6D]/60 text-xs font-bold uppercase tracking-widest mb-2">
@@ -676,7 +673,7 @@ export default function Home() {
       </section>
 
       {/* Trending courses */}
-      <section className="mx-auto w-[calc(100%_-_1rem)] py-16 sm:w-[calc(100%_-_3rem)]">
+      <section className="mx-auto w-[90%] py-16">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <p className="mb-1 text-xs font-bold uppercase tracking-widest text-[#015196]">
@@ -705,8 +702,8 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="bg-linear-to-br from-[#003B6D] to-[#015196] text-white py-16 px-4 sm:px-6">
-        <div className="mx-auto w-[calc(100%_-_1rem)] sm:w-[calc(100%_-_3rem)]">
+      <section className="bg-linear-to-br from-[#003B6D] to-[#015196] text-white py-16">
+        <div className="mx-auto w-[90%]">
           <div className="text-center mb-12">
             <p className="text-[#F5A623] text-xs font-bold uppercase tracking-widest mb-2">
               Get started
@@ -759,8 +756,8 @@ export default function Home() {
       <EssentialSkillsCarousel />
 
       {/* Testimonials */}
-      <section className="py-16 px-4 sm:px-6 bg-[#F9F8F5]">
-        <div className="mx-auto w-[calc(100%_-_1rem)] sm:w-[calc(100%_-_3rem)]">
+      <section className="py-16 bg-[#F9F8F5]">
+        <div className="mx-auto w-[90%]">
           <div className="text-center mb-10">
             {/* <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-2">
               Student stories
@@ -805,7 +802,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-linear-to-br from-[#1B1F3B] to-[#0e1020] text-white py-20 px-4 sm:px-6">
+      <section className="bg-linear-to-br from-[#1B1F3B] to-[#0e1020] text-white py-20">
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-5xl mb-5">🎓</div>
           <h2 className="font-display font-black text-4xl md:text-5xl mb-4">
