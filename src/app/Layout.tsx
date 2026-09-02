@@ -1,8 +1,15 @@
-import { Outlet } from "react-router";
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 export default function Layout() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname]);
+
   return (
     <div>
       {/* Announcement bar */}
@@ -17,7 +24,9 @@ export default function Layout() {
         </a>
       </div>
       <Navbar />
-      <Outlet />
+      <div>
+        <Outlet />
+      </div>
       <Footer />
     </div>
   );

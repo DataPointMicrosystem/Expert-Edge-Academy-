@@ -19,10 +19,9 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-neutral-300 shadow-sm">
-      <div className="max-w-375 mx-auto px-4 sm:px-6 flex items-center gap-8 h-16">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 shrink-0">
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl shadow-[0_10px_30px_rgba(11,23,53,0.04)]">
+      <div className="max-w-375 mx-auto w-full px-4 sm:px-6 flex items-center gap-8 h-18">
+        <Link to="/" className="flex items-center gap-2.5 shrink-0">
           <img
             src={expertedgeLogo}
             alt="ExpertEdge Academy"
@@ -30,14 +29,13 @@ export default function Navbar() {
           />
         </Link>
 
-        {/* Search */}
         <form
           onSubmit={handleSearch}
           className="hidden md:flex flex-1 max-w-200"
         >
           <div className="relative w-full">
             <svg
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
               viewBox="0 0 20 20"
               fill="none"
               stroke="currentColor"
@@ -50,26 +48,24 @@ export default function Navbar() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               type="text"
-              placeholder="Search for anything"
-              className="w-full pl-10 pr-4 py-2.5 rounded-full border-2 border-neutral-300 focus:border-primary-blue bg-neutral-100 text-sm focus:outline-none focus:bg-white transition-all placeholder:text-neutral-600"
+              placeholder="Search for courses"
+              className="w-full pl-10 pr-4 py-2.5 rounded-full border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:border-primary-blue focus:bg-white focus:outline-none placeholder:text-slate-500"
             />
           </div>
         </form>
 
-        {/* Nav links */}
         <nav className="hidden lg:flex items-center gap-1 ml-2">
           <ExploreDropdown />
           <TeachDropdown />
         </nav>
 
         <div className="flex items-center gap-2 ml-auto">
-          {/* Cart */}
           <Link
             to="/cart"
-            className="relative p-2.5 rounded-xl hover:bg-neutral-100 transition-colors"
+            className="relative p-2.5 rounded-xl text-slate-700 hover:bg-slate-100"
           >
             <svg
-              className="w-5 h-5 text-charcoal"
+              className="w-5 h-5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -84,7 +80,7 @@ export default function Navbar() {
               <path d="M16 10a4 4 0 01-8 0" />
             </svg>
             {count > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary-blue text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow">
+              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary-blue text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
                 {count}
               </span>
             )}
@@ -92,12 +88,12 @@ export default function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary-blue text-white flex items-center justify-center text-sm font-bold">
+              <div className="w-8 h-8 rounded-full bg-primary-blue text-white flex items-center justify-center text-sm font-bold shadow-sm">
                 {user.name[0]}
               </div>
               <button
                 onClick={logout}
-                className="hidden sm:block text-sm text-neutral-500 hover:text-charcoal transition-colors"
+                className="hidden sm:block text-sm text-slate-600 hover:text-slate-900"
               >
                 Log out
               </button>
@@ -106,13 +102,13 @@ export default function Navbar() {
             <>
               <Link
                 to="/login"
-                className="hidden sm:block text-sm font-semibold px-4 py-2 rounded-[10px] border-2 border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all"
+                className="hidden sm:block text-sm font-semibold px-4 py-2 rounded-xl border border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white"
               >
                 Log in
               </Link>
               <Link
                 to="/signup"
-                className="text-sm font-semibold px-4 py-2.5 rounded-[10px] bg-primary-blue text-white hover:opacity-90 transition-opacity shadow-sm"
+                className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-primary-blue text-white shadow-[0_10px_25px_rgba(21,76,140,0.22)] hover:translate-y-[-1px] hover:shadow-[0_12px_30px_rgba(21,76,140,0.28)]"
               >
                 Sign up
               </Link>
@@ -120,7 +116,7 @@ export default function Navbar() {
           )}
 
           <button
-            className="lg:hidden p-2 rounded-lg hover:bg-neutral-100"
+            className="lg:hidden p-2 rounded-lg hover:bg-slate-100"
             onClick={() => setMobileOpen((o) => !o)}
           >
             <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">

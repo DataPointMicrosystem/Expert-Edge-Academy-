@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useCart } from "../context/CartContext";
 import type { Course } from "../data/courses";
 
@@ -41,134 +41,136 @@ export default function CourseCard({
 }) {
   const [wished, setWished] = useState(false);
   const { addToCart, isInCart } = useCart();
+  const navigate = useNavigate();
   const inCart = isInCart(course.id);
   const discount = Math.round((1 - course.price / course.originalPrice) * 100);
+  const hoverFlipClass =
+    popoverSide === "left"
+      ? "group-hover:[transform:rotateY(-180deg)] group-focus-within:[transform:rotateY(-180deg)]"
+      : "group-hover:[transform:rotateY(180deg)] group-focus-within:[transform:rotateY(180deg)]";
+  const backFaceTransform =
+    popoverSide === "left"
+      ? "[transform:rotateY(-180deg)]"
+      : "[transform:rotateY(180deg)]";
+  const openCourse = (event: React.MouseEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("a, button")) return;
+    navigate(`/courses/${course.id}`);
+  };
 
   return (
-    <div className="group relative z-0 bg-white rounded-2xl overflow-visible border border-gray-100 hover:z-40 hover:shadow-xl hover:-translate-y-1 transition-all duration-250 flex flex-col">
-      <Link
-        to={`/courses/${course.id}`}
-        className="relative overflow-hidden block bg-gray-100 aspect-video"
+    <div
+      className="group relative h-full min-h-[25rem] cursor-pointer [perspective:1200px]"
+      onClick={openCourse}
+    >
+      <button
+        type="button"
+        aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+        onClick={() => setWished((w) => !w)}
+        className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-slate-100 transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#154c8c]"
       >
-        <img
-          src={`https://images.unsplash.com/${course.image}?w=480&h=270&fit=crop&auto=format`}
-          alt={course.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400"
-        />
-        {/* {course.badge && (
-          <span
-            className={`absolute top-3 left-3 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm ${
-              course.badge === "Bestseller"
-                ? "bg-[#F5A623] text-[#1B1F3B]"
-                : course.badge === "Hot"
-                  ? "bg-red-500 text-white"
-                  : "bg-[#1B1F3B] text-white"
-            }`}
-          >
-            {course.badge}
-          </span>
-        )} */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setWished((w) => !w);
-          }}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 20 20"
+          fill={wished ? "#EF4444" : "none"}
+          stroke={wished ? "#EF4444" : "#374151"}
+          strokeWidth="1.5"
         >
-          <svg
-            className="w-4 h-4"
-            viewBox="0 0 20 20"
-            fill={wished ? "#EF4444" : "none"}
-            stroke={wished ? "#EF4444" : "#374151"}
-            strokeWidth="1.5"
+          <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+        </svg>
+      </button>
+      <div className="relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus-within:[transform:rotateY(180deg)]">
+        <div className="absolute inset-0 flex h-full flex-col overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.08)] [backface-visibility:hidden]">
+          <Link
+            to={`/courses/${course.id}`}
+            className="relative block aspect-video shrink-0 overflow-hidden bg-slate-100"
           >
-            <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
-          </svg>
-        </button>
-      </Link>
-
-      <div className="p-4 flex flex-col gap-2 flex-1 rounded-b-2xl">
-        <Link to={`/courses/${course.id}`}>
-          <h3 className="font-display font-semibold text-sm leading-snug line-clamp-2 text-gray-900 hover:text-[#1B1F3B] transition-colors">
-            {course.title}
-          </h3>
-        </Link>
-        <p className="text-xs text-gray-500">{course.instructor}</p>
-
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-bold text-[#c47a00]">
-            {course.rating}
-          </span>
-          <StarRating rating={course.rating} />
-          <span className="text-xs text-gray-400">
-            ({course.reviews.toLocaleString()})
-          </span>
-        </div>
-
-        <div className="text-xs text-gray-400">
-          {course.hours}h · {course.lectures} lectures · {course.level}
-        </div>
-
-        <div className="flex items-center gap-2 mt-auto pt-3 border-t border-gray-100">
-          <span className="font-bold text-gray-900">${course.price}</span>
-          <span className="text-xs text-gray-400 line-through">
-            ${course.originalPrice}
-          </span>
-          <span className="text-xs font-bold text-green-600 ml-auto">
-            {discount}% off
-          </span>
-        </div>
-      </div>
-
-      <div
-        className={`pointer-events-none absolute top-[calc(100%+0.75rem)] left-1/2 z-30 flex w-[min(23rem,calc(100vw-2rem))] -translate-x-1/2 translate-y-2 flex-col gap-3 rounded-xl border border-[#d9dce6] bg-white p-5 text-[#303447] opacity-0 shadow-[0_12px_35px_rgba(20,26,55,0.16)] transition-all duration-200 before:absolute before:left-1/2 before:top-[-0.65rem] before:h-5 before:w-5 before:-translate-x-1/2 before:rotate-45 before:border-l before:border-t before:border-[#d9dce6] before:bg-white group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100 md:top-[-4rem] md:left-[calc(100%+1rem)] md:translate-x-0 md:before:left-[-0.65rem] md:before:top-1/2 md:before:-translate-y-1/2 md:before:translate-x-0 md:before:border-b md:before:border-l md:before:border-t-0 md:before:rotate-45 ${
-          popoverSide === "left"
-            ? "md:left-auto md:right-[calc(100%+1rem)] md:before:left-auto md:before:right-[-0.65rem] md:before:border-b-0 md:before:border-l-0 md:before:border-r md:before:border-t"
-            : ""
-        }`}
-      >
-        <div className="relative z-10">
-          <h3 className="font-display text-lg font-bold leading-tight text-[#303447]">
-            {course.title}
-          </h3>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <img
+              src={`https://images.unsplash.com/${course.image}?w=480&h=270&fit=crop&auto=format`}
+              alt={course.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-[#0b1735]/65 via-[#0b1735]/10 to-transparent" />
             {course.badge && (
-              <span className="rounded-md bg-[#c9eff0] px-2.5 py-1 font-bold text-[#16616a]">
+              <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#0b1735] shadow-sm">
                 {course.badge}
               </span>
             )}
-            <span className="text-[#27714e]">
-              Updated <strong>{course.lastUpdated}</strong>
+          </Link>
+
+          <div className="flex flex-1 flex-col gap-2 p-4">
+            <Link to={`/courses/${course.id}`}>
+              <h3 className="line-clamp-2 font-display text-[1.05rem] font-black leading-snug text-slate-900 transition-colors hover:text-[#154c8c]">
+                {course.title}
+              </h3>
+            </Link>
+            <p className="text-xs text-slate-500">{course.instructor}</p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-black text-[#d88a00]">
+                {course.rating}
+              </span>
+              <StarRating rating={course.rating} />
+              <span className="text-xs text-slate-400">
+                ({course.reviews.toLocaleString()})
+              </span>
+            </div>
+            <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-3">
+              <span className="text-lg font-black text-slate-900">
+                ${course.price}
+              </span>
+              <span className="text-xs text-slate-400 line-through">
+                ${course.originalPrice}
+              </span>
+              <span className="ml-auto rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700">
+                {discount}% off
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute inset-0 flex h-full flex-col overflow-hidden rounded-[22px] border border-[#dbe7f5] bg-[linear-gradient(180deg,#f8fbff_0%,#edf4fb_100%)] p-5 text-[#1B1F3B] shadow-[0_24px_60px_rgba(11,23,53,0.12)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+          <div className="mb-3 flex items-start justify-between gap-3 pr-10">
+            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#154c8c]">
+              Inside the course
+            </span>
+            <span className="text-xs font-semibold text-[#117a5c]">
+              {course.lastUpdated}
             </span>
           </div>
-          <p className="mt-3 text-xs text-[#7a8198]">
-            {course.hours} total hours · {course.level} · Subtitles
+          <h3 className="line-clamp-3 font-display text-xl font-black leading-tight text-slate-900">
+            {course.title}
+          </h3>
+          <p className="mt-2 text-xs text-slate-500">
+            {course.hours} hours · {course.level} · {course.lectures} lessons
           </p>
-          <p className="mt-3 text-sm leading-relaxed text-[#4f5668]">
+          <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-slate-600">
             {course.description}
           </p>
-          <div className="mt-3 space-y-2.5 text-sm leading-relaxed text-[#4f5668]">
+          <div className="mt-4 space-y-2 text-xs leading-relaxed text-slate-600">
             {course.whatYoullLearn.slice(0, 3).map((item) => (
-              <div key={item} className="flex gap-2.5">
-                <span className="shrink-0 text-[#4f5668]" aria-hidden="true">
-                  ✓
+              <div key={item} className="flex gap-2">
+                <span
+                  className="shrink-0 font-black text-[#154c8c]"
+                  aria-hidden="true"
+                >
+                  +
                 </span>
-                <span>{item}</span>
+                <span className="line-clamp-2">{item}</span>
               </div>
             ))}
           </div>
+          <div className="mt-auto flex items-center gap-3 border-t border-slate-200 pt-4">
+            <span className="font-display text-2xl font-black text-[#0b1735]">
+              ${course.price}
+            </span>
+            <button
+              onClick={() => addToCart(course)}
+              disabled={inCart}
+              className={`ml-auto rounded-xl px-4 py-2.5 text-xs font-bold transition-colors ${inCart ? "cursor-default bg-emerald-100 text-emerald-700" : "bg-[#154c8c] text-white hover:bg-[#0b1735]"}`}
+            >
+              {inCart ? "Added" : "Add to cart"}
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => addToCart(course)}
-          disabled={inCart}
-          className={`relative z-10 w-full rounded-xl py-3 text-sm font-bold transition-colors ${
-            inCart
-              ? "cursor-default bg-green-50 text-green-700"
-              : "bg-[#015196] text-white hover:bg-[#003B6D]"
-          }`}
-        >
-          {inCart ? "✓ Added to cart" : "Add to cart"}
-        </button>
       </div>
     </div>
   );

@@ -459,7 +459,7 @@ export default function CourseDetail() {
               Enroll now — ${course.price}
             </button>
             <Link
-              to={`/courses/${course.id}/learn`}
+              to={`/courses/${course.id}/lessons`}
               className="px-6 py-3 rounded-xl border border-white/25 font-bold text-sm hover:bg-white/10 transition-colors"
             >
               Preview for free
