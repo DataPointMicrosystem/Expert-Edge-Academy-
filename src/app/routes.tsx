@@ -3,6 +3,8 @@ import Layout from "./Layout";
 import Home from "../pages/Home";
 import Login from "../pages/Auth/Login";
 import Signup from "../pages/Auth/Signup";
+import ForgotPassword from "../pages/Auth/ForgotPassword";
+import ResetPassword from "../pages/Auth/ResetPassword";
 import CourseDetail from "../pages/CourseDetail";
 import CourseLessons from "../pages/CourseLessons";
 
@@ -16,11 +18,11 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "course/:id",
+        path: "courses/:id",
         element: <CourseDetail />,
       },
       {
-        path: "course/:id/lessons",
+        path: "courses/:id/lessons",
         element: <CourseLessons />,
       },
     ],
@@ -32,5 +34,13 @@ export const router = createBrowserRouter([
   {
     path: "/signup",
     element: <Signup />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
 ]);

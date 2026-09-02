@@ -7,26 +7,26 @@ export default function Footer() {
     return date.getFullYear();
   };
   return (
-    <footer className="bg-[#1B1F3B] text-white pt-14 pb-8 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
+    <footer className="bg-[#0b1735] px-4 pb-8 pt-14 text-white sm:px-6">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-10 grid grid-cols-2 gap-8 md:grid-cols-5">
           <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
+            <Link to="/" className="mb-4 flex items-center gap-2">
               <img
                 src={Logo}
                 alt="Expert Edge Academy"
                 className="h-12 w-auto object-contain"
               />
             </Link>
-            <p className="text-xs text-white/50 leading-relaxed">
+            <p className="text-xs leading-relaxed text-white/60">
               Online learning that opens doors and creates lasting
               opportunities.
             </p>
-            <div className="flex gap-3 mt-4">
+            <div className="mt-4 flex gap-3">
               {["𝕏", "in", "▶", "📸"].map((icon, i) => (
                 <button
                   key={i}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs transition-colors hover:bg-white/20"
                 >
                   {icon}
                 </button>

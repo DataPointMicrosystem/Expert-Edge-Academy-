@@ -35,7 +35,7 @@ export default function ExploreDropdown() {
       </Link>
 
       <div
-        className={`fixed left-0 right-0 top-16 z-50 transition-all duration-200 ${
+        className={`fixed left-0 right-0 top-[4.5rem] z-50 transition-all duration-200 ${
           open
             ? "visible translate-y-0 opacity-100"
             : "invisible -translate-y-2 opacity-0"
@@ -63,9 +63,12 @@ export default function ExploreDropdown() {
 
             <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-5">
               {FEATURED_CATEGORIES.map((categoryName) => {
-                const category = CATEGORIES.find(({ name }) => name === categoryName);
+                const category = CATEGORIES.find(
+                  ({ name }) => name === categoryName,
+                );
                 const categoryCourses = COURSES.filter(
-                  ({ category: courseCategory }) => courseCategory === categoryName,
+                  ({ category: courseCategory }) =>
+                    courseCategory === categoryName,
                 ).slice(0, 2);
 
                 return (
@@ -75,7 +78,9 @@ export default function ExploreDropdown() {
                       className="mb-2 block border-b border-neutral-100 pb-2 text-sm font-semibold text-charcoal transition-colors hover:text-primary-blue"
                       onClick={() => setOpen(false)}
                     >
-                      {categoryName === "Data Science" ? "Data & AI" : categoryName}
+                      {categoryName === "Data Science"
+                        ? "Data & AI"
+                        : categoryName}
                       <span className="ml-1 text-[11px] font-normal text-neutral-500">
                         ({category?.count.toLocaleString()})
                       </span>
@@ -85,7 +90,7 @@ export default function ExploreDropdown() {
                       {categoryCourses.map((course) => (
                         <Link
                           key={course.id}
-                          to={`/course/${course.id}`}
+                          to={`/courses/${course.id}`}
                           className="block rounded-md py-1.5 text-xs leading-snug text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-primary-blue"
                           onClick={() => setOpen(false)}
                         >

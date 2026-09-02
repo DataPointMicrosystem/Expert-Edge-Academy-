@@ -1,415 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router";
-import { COURSES, CATEGORIES } from "../data/courses";
+import { COURSES, CATEGORIES, COMPANIES, TESTIMONIALS } from "../data/courses";
 import CourseCard from "../components/CourseCard";
-
-const HERO_SLIDES = [
-  {
-    id: 1,
-    tag: "Learn. Grow. Get ahead.",
-    headline: "Skills that move\nyou forward.",
-    sub: "Learn practical skills from experienced instructors and build the knowledge you need for your career, business, and future.",
-    cta: "Explore courses",
-    ctaHref: "#courses",
-    accent: "#00549C",
-    bg: "from-[#001B33] to-[#003B6D]",
-    img: "photo-1522202176988-66273c2fd55f",
-    badge: "Learn from expert instructors",
-  },
-  {
-    id: 2,
-    tag: "Explore new skills",
-    headline: "Learn today.\nBuild tomorrow.",
-    sub: "Discover courses in technology, business, design, finance, marketing, and more — all in one learning platform.",
-    cta: "Browse courses",
-    ctaHref: "#courses",
-    accent: "#00549C",
-    bg: "from-[#001B33] to-[#333333]",
-    img: "photo-1677442135703-1787eea5ce01",
-    badge: "Courses across multiple categories",
-  },
-  {
-    id: 3,
-    tag: "Learn from experts",
-    headline: "Turn knowledge\ninto real skills.",
-    sub: "Learn through practical lessons, hands-on projects, and expert-led courses designed to help you apply what you learn.",
-    cta: "Start learning",
-    ctaHref: "#courses",
-    accent: "#00549C",
-    bg: "from-[#001B33] to-[#003B6D]",
-    img: "photo-1561070791-2526d30994b5",
-    badge: "Practical learning that works",
-  },
-];
-const TESTIMONIALS = [
-  {
-    name: "Marcus Reid",
-    role: "Software Engineer · Stripe",
-    text: "ExpertEdge helped me land my first engineering job in six months. The React course alone paid for itself 100 times over.",
-    avatar: "photo-1507003211169-0a1dd7228f2d",
-  },
-  {
-    name: "Priya Nair",
-    role: "Freelance UI Designer",
-    text: "I went from zero design skills to booking $5k/month clients within six months. The UI/UX bootcamp is genuinely world-class.",
-    avatar: "photo-1494790108377-be9c29b29330",
-  },
-  {
-    name: "David Okafor",
-    role: "Data Analyst · Netflix",
-    text: "The Python for Data Science course is hands-down the most comprehensive I've found anywhere. The instructor is exceptional.",
-    avatar: "photo-1500648767791-00dcc994a43e",
-  },
-];
-
-const COMPANIES = [
-  "Google",
-  "Microsoft",
-  "Spotify",
-  "Amazon",
-  "Shopify",
-  "Airbnb",
-  "Netflix",
-  "Stripe",
-];
-
-const ESSENTIAL_SKILLS = [
-  {
-    title: "Data Science",
-    image: "photo-1518770660439-4636190af475",
-    tint: "#d9d5d2",
-  },
-  {
-    title: "ChatGPT",
-    image: "photo-1677442135703-1787eea5ce01",
-    tint: "#19afe9",
-  },
-  {
-    title: "Prompt Engineering",
-    image: "photo-1556761175-b413da4baf72",
-    tint: "#57b987",
-  },
-  {
-    title: "UI/UX Design",
-    image: "photo-1561070791-2526d30994b5",
-    tint: "#f3c6d7",
-  },
-  {
-    title: "Digital Marketing",
-    image: "photo-1460925895917-afdab827c52f",
-    tint: "#f0b54a",
-  },
-  {
-    title: "Web Development",
-    image: "photo-1555066931-4636190af475",
-    tint: "#8eb8d8",
-  },
-];
-
-function EssentialSkillsCarousel() {
-  const [page, setPage] = useState(0);
-  const pages = [ESSENTIAL_SKILLS.slice(0, 3), ESSENTIAL_SKILLS.slice(3)];
-
-  return (
-    <section className="overflow-hidden bg-white py-16 sm:py-20">
-      <div className="mx-auto grid w-[90%] max-w-375 gap-10 lg:grid-cols-[minmax(220px,0.72fr)_minmax(0,2.28fr)] lg:items-center lg:gap-12">
-        <div className="max-w-xl lg:pt-2">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#015196]">
-            Build your edge
-          </p>
-          <h2 className="font-display text-3xl font-bold leading-tight text-[#003B6D] sm:text-4xl md:text-5xl">
-            Learn essential career and life skills
-          </h2>
-          <p className="mt-4 max-w-md text-base leading-relaxed text-[#7c819e] sm:text-lg">
-            ExpertEdge helps you build in-demand skills fast and advance your
-            career in a changing job market.
-          </p>
-        </div>
-
-        <div className="min-w-0">
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{ transform: `translateX(-${page * 100}%)` }}
-            >
-              {pages.map((skills, pageIndex) => (
-                <div
-                  key={pageIndex}
-                  className="grid min-w-full grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5"
-                >
-                  {skills.map((skill) => (
-                    <Link
-                      key={skill.title}
-                      to="#courses"
-                      className="group relative aspect-[0.91] min-w-0 overflow-hidden rounded-[22px] p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1 sm:aspect-[0.72] sm:p-5"
-                      style={{ backgroundColor: skill.tint }}
-                    >
-                      <img
-                        src={`https://images.unsplash.com/${skill.image}?w=900&h=900&fit=crop&auto=format&q=80`}
-                        alt=""
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/5" />
-                      <div className="absolute inset-x-4 bottom-4 flex min-h-28 items-center justify-between rounded-xl bg-white px-5 py-5 shadow-lg sm:inset-x-5 sm:bottom-5">
-                        <span className="text-xl font-medium text-[#292b45] sm:text-2xl">
-                          {skill.title}
-                        </span>
-                        <span className="ml-3 text-3xl font-light text-[#015196] transition-transform group-hover:translate-x-1">
-                          <span aria-hidden="true">→</span>
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-8 flex items-center justify-center gap-5">
-            <button
-              type="button"
-              aria-label="Previous essential skills"
-              onClick={() =>
-                setPage(
-                  (current) => (current - 1 + pages.length) % pages.length,
-                )
-              }
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl text-[#292b45] shadow-[0_6px_24px_rgba(41,43,69,0.12)] transition hover:-translate-x-0.5 hover:shadow-lg"
-            >
-              <span aria-hidden="true">←</span>
-            </button>
-            <div
-              className="flex items-center gap-2"
-              aria-label="Carousel pages"
-            >
-              {pages.map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  aria-label={`Go to skills page ${index + 1}`}
-                  aria-current={page === index}
-                  onClick={() => setPage(index)}
-                  className={`h-4 rounded-full transition-all ${page === index ? "w-14 bg-[#015196]" : "w-4 bg-[#e8e8f1] hover:bg-[#c7c7d8]"}`}
-                />
-              ))}
-            </div>
-            <button
-              type="button"
-              aria-label="Next essential skills"
-              onClick={() => setPage((current) => (current + 1) % pages.length)}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl text-[#292b45] shadow-[0_6px_24px_rgba(41,43,69,0.12)] transition hover:translate-x-0.5 hover:shadow-lg"
-            >
-              <span aria-hidden="true">→</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HeroCarousel() {
-  const [current, setCurrent] = useState(0);
-  const [animating, setAnimating] = useState(false);
-
-  const go = useCallback(
-    (idx: number) => {
-      if (animating) return;
-      setAnimating(true);
-      setTimeout(() => {
-        setCurrent(idx);
-        setAnimating(false);
-      }, 300);
-    },
-    [animating],
-  );
-
-  useEffect(() => {
-    const t = setInterval(() => go((current + 1) % HERO_SLIDES.length), 5000);
-    return () => clearInterval(t);
-  }, [current, go]);
-
-  const slide = HERO_SLIDES[current];
-
-  return (
-    <section
-      className={`relative mx-auto mt-3 w-[90%] overflow-hidden rounded-2xl bg-linear-to-br ${slide.bg} text-white shadow-2xl ring-1 ring-black/10 transition-all duration-700 sm:mt-4 sm:rounded-[28px] min-h-0 md:min-h-150`}
-    >
-      {/* Background image */}
-      <div className="absolute inset-0">
-        <img
-          src={`https://images.unsplash.com/${slide.img}?w=1400&h=640&fit=crop&auto=format&q=60`}
-          alt=""
-          className={`w-full h-full object-cover transition-opacity duration-700 ${animating ? "opacity-0" : "opacity-30"}`}
-        />
-        <div className="absolute inset-0 bg-linear-to-r from-[#001B33]/90 via-[#003B6D]/65 to-[#003B6D]/30" />
-      </div>
-
-      <div className="relative max-w-375 mx-auto px-5 py-12 sm:px-10 sm:py-16 md:px-12 md:py-24 lg:px-14 lg:py-28 grid md:grid-cols-2 gap-10 items-center">
-        <div
-          className={`transition-all duration-500 ${animating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
-        >
-          {/* <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-4 py-1.5 text-xs font-semibold mb-5 border border-white/20">
-            <span
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: slide.accent }}
-            />
-            {slide.badge}
-          </div> */}
-          <h1 className="font-display font-black text-3xl leading-[1.08] tracking-tight mb-4 sm:text-5xl sm:mb-5 md:text-6xl whitespace-pre-line drop-shadow-sm">
-            {slide.headline.split("\n").map((line, i) => (
-              <span key={i}>
-                {i === 1 ? (
-                  <em className="not-italic" style={{ color: "#ffff" }}>
-                    {line}
-                  </em>
-                ) : (
-                  line
-                )}
-                {i === 0 && <br />}
-              </span>
-            ))}
-          </h1>
-          <p className="text-white/85 text-sm leading-relaxed mb-6 sm:text-base md:text-lg md:mb-8 font-medium max-w-lg">
-            {slide.sub}
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <a
-              href={slide.ctaHref}
-              className="px-5 py-3 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-105 active:scale-100 sm:px-7 sm:py-3.5"
-              style={{ backgroundColor: slide.accent, color: "#FFFFFF" }}
-            >
-              {slide.cta}
-            </a>
-            <Link
-              to="/signup"
-              className="px-5 py-3 rounded-full font-bold text-sm border-2 border-white/30 hover:bg-white/10 transition-colors sm:px-7 sm:py-3.5"
-            >
-              Start for free →
-            </Link>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-6 pt-5 border-t border-white/15 sm:gap-6 sm:mt-8 sm:pt-6">
-            {[
-              { v: "Expert", l: "Instructors" },
-              { v: "Practical", l: "Learning" },
-              { v: "Flexible", l: "Learning Pace" },
-            ].map((s) => (
-              <div key={s.l}>
-                <div className="font-display font-black text-[1rem]">{s.v}</div>
-                <div className="text-[14px] font-medium text-white/65">
-                  {s.l}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Featured card */}
-        <div
-          className={`hidden lg:flex min-w-0 flex-col items-end transition-all duration-500 ${animating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"}`}
-        >
-          <div className="relative w-full max-w-150 [perspective:1400px] lg:scale-105">
-            <div
-              className="absolute -inset-2 rounded-2xl opacity-50 blur-xl"
-              style={{ backgroundColor: slide.accent }}
-            />
-            <div className="absolute inset-x-5 -bottom-3 top-3 rounded-2xl border border-white/20 bg-white/10 transform-[translateZ(-28px)_rotateY(-4deg)]" />
-            <div className="relative overflow-hidden rounded-2xl bg-white text-gray-900 shadow-2xl ring-1 ring-white/50 transform-[rotateY(-3deg)_rotateX(1deg)] transition-transform duration-500 hover:transform-[rotateY(0deg)_rotateX(0deg)]">
-              <img
-                src={`https://images.unsplash.com/${slide.img}?w=480&h=240&fit=crop&auto=format`}
-                alt="Featured"
-                className="w-full aspect-2/1 object-cover contrast-110"
-              />
-              <div className="p-4">
-                <span
-                  className="text-xs font-black px-2.5 py-1 rounded-full"
-                  style={{ backgroundColor: slide.accent, color: "#FFFFFF" }}
-                >
-                  {HERO_SLIDES[current].tag}
-                </span>
-                <p className="font-display font-black text-base mt-2 leading-snug">
-                  {slide.headline.replace("\n", " ")}
-                </p>
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <span key={s} className="text-primary-blue text-xs">
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                  <span className="font-black text-deep-blue">From $9.99</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Floating badge */}
-            <div className="absolute -bottom-4 -left-6 bg-white rounded-xl px-4 py-3 shadow-2xl border border-gray-100 flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-black text-sm">
-                ✓
-              </div>
-              <div>
-                <div className="text-xs font-black text-gray-900">
-                  Certificate included
-                </div>
-                <div className="text-[10px] text-gray-400">
-                  Shareable on LinkedIn
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Slide indicators */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-        {HERO_SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => go(i)}
-            className={`transition-all duration-300 rounded-full h-2 ${i === current ? "w-8 bg-white" : "w-2 bg-white/40"}`}
-          />
-        ))}
-      </div>
-
-      {/* Arrow controls */}
-      <button
-        onClick={() =>
-          go((current - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
-        }
-        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center sm:left-4 sm:w-10 sm:h-10"
-      >
-        <svg
-          className="w-5 h-5 text-white"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-      <button
-        onClick={() => go((current + 1) % HERO_SLIDES.length)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/15 backdrop-blur hover:bg-white/25 transition-colors flex items-center justify-center sm:right-4 sm:w-10 sm:h-10"
-      >
-        <svg
-          className="w-5 h-5 text-white"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-    </section>
-  );
-}
+import { HeroCarousel } from "@/components/HeroCarousel";
+import { EssentialSkillsCarousel } from "@/components/EssentialSkillsCarousel";
 
 export default function Home() {
   const [searchParams] = useSearchParams();
@@ -437,20 +31,19 @@ export default function Home() {
     .slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-[#F9F8F5]">
+    <div className="min-h-screen bg-transparent">
       <HeroCarousel />
-
       {/* Trusted by */}
-      <section className="bg-white border-y border-gray-100 py-5">
-        <div className="mx-auto w-[90%] flex flex-col sm:flex-row items-center gap-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">
+      <section className="border-y border-slate-200/80 bg-white/80 py-5 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-375 flex-col items-center gap-4 px-4 sm:flex-row sm:px-6">
+          <p className="whitespace-nowrap text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">
             Trusted by teams at
           </p>
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-2 justify-center sm:justify-start">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 sm:justify-start">
             {COMPANIES.map((c) => (
               <span
                 key={c}
-                className="text-sm font-bold text-gray-300 hover:text-gray-500 transition-colors cursor-default"
+                className="cursor-default text-sm font-bold text-slate-300 transition-colors hover:text-slate-500"
               >
                 {c}
               </span>
@@ -460,20 +53,23 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section className="mx-auto w-[90%] py-14 lg:py-16">
+      <section className="mx-auto w-full max-w-375 px-4 py-14 sm:px-6 lg:py-16">
         <div className="mb-8 flex items-end justify-between sm:mb-9">
           <div>
-            <h2 className="mb-2 text-[28px] font-bold uppercase tracking-[0.16em] text-[#1B1F3B]">
-              Learn skills that create opportunities
+            <p className="mb-3 text-[11px] font-black uppercase tracking-[0.22em] text-[#154c8c]">
+              Career acceleration
+            </p>
+            <h2 className="mb-2 text-3xl font-black text-[#0b1735] sm:text-4xl">
+              Skills that create momentum.
             </h2>
-            <p className="font-display text-3xl leading-none text-[#1B1F3B] sm:text-[18px]">
+            <p className="max-w-2xl text-base leading-relaxed text-slate-600">
               From essential professional skills to in-demand technical
-              knowledge, ExpertEdge Academy helps you prepare for what's next.
+              knowledge, ExpertEdge Academy helps you prepare for what’s next.
             </p>
           </div>
           <button
             onClick={() => setSelectedCat("All")}
-            className="text-sm font-semibold text-[#1B1F3B] hover:underline hidden sm:block"
+            className="hidden text-sm font-semibold text-[#154c8c] hover:underline sm:block"
           >
             View all →
           </button>
@@ -526,34 +122,35 @@ export default function Home() {
       </section>
 
       {/* Promo Banner 1 — Sale */}
-      <section className="mx-auto w-[90%] mb-10">
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#003B6D] to-[#015196] text-white px-8 py-10 md:px-14 flex flex-col md:flex-row items-center gap-6">
-          <div className="absolute right-0 top-0 h-full w-1/2 opacity-10">
+      <section className="mx-auto mb-10 w-full max-w-375 px-4 sm:px-6">
+        <div className="relative flex min-h-55 flex-col items-center gap-6 overflow-hidden rounded-[30px] bg-[linear-gradient(135deg,#0b1735_0%,#154c8c_45%,#0f254d_100%)] px-8 py-8 text-white md:flex-row md:px-14 md:py-9">
+          <div className="absolute inset-0">
             <img
               src="https://images.unsplash.com/photo-1543269664-76bc3997d9ea?w=600&h=300&fit=crop&auto=format"
               alt=""
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover opacity-25"
             />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(247,185,85,0.28),transparent_26%)]" />
           </div>
-          <div className="relative z-10 flex-1">
-            <p className="text-[#B9D7EE] text-xs font-bold uppercase tracking-widest mb-2">
+          <div className="relative z-10 min-w-0 flex-1">
+            <p className="mb-2 text-xs font-black uppercase tracking-[0.22em] text-[#f7d28b]">
               🔥 Weekend sale
             </p>
-            <h2 className="font-display font-black text-3xl md:text-4xl mb-2">
-              All courses <span className="text-white">$9.99</span>
+            <h2 className="mb-2 font-display text-3xl font-black md:text-4xl">
+              All courses <span className="text-[#f7b955]">$9.99</span>
             </h2>
-            <p className="text-white/60 text-sm max-w-sm">
+            <p className="max-w-sm text-sm text-white/75">
               Sale ends Sunday. Over 68,000 courses to choose from.
             </p>
           </div>
-          <div className="relative z-10 flex flex-col items-center gap-3">
-            <div className="flex gap-2">
+          <div className="relative z-10 flex w-full flex-col items-center gap-3 md:w-auto">
+            <div className="flex gap-2 sm:gap-3">
               {["08", "14", "32"].map((v, i) => (
                 <div key={i} className="flex flex-col items-center">
-                  <div className="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center font-display font-black text-2xl">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/10 font-display text-2xl font-black shadow-inner ring-1 ring-white/10 sm:h-16 sm:w-16 sm:text-3xl">
                     {v}
                   </div>
-                  <span className="text-[10px] text-white/40 mt-1">
+                  <span className="mt-1 text-[10px] uppercase tracking-[0.1em] text-white/50">
                     {["hrs", "min", "sec"][i]}
                   </span>
                 </div>
@@ -561,7 +158,7 @@ export default function Home() {
             </div>
             <a
               href="#courses"
-              className="px-6 py-2.5 rounded-full bg-white text-[#003B6D] font-bold text-sm hover:bg-[#DCECF7] transition-colors"
+              className="rounded-full bg-white px-6 py-2.5 text-sm font-bold text-[#0b1735] transition-colors hover:bg-[#f4f6fb]"
             >
               Claim your deal →
             </a>
@@ -570,7 +167,10 @@ export default function Home() {
       </section>
 
       {/* Courses */}
-      <section id="courses" className="mx-auto w-[90%] pb-16">
+      <section
+        id="courses"
+        className="mx-auto w-full max-w-375 px-4 sm:px-6 pb-16"
+      >
         <div className="flex items-end justify-between mb-8">
           <div>
             {/* <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-1">
@@ -620,47 +220,55 @@ export default function Home() {
         )}
 
         <div className="mt-10 text-center">
-          <button className="px-8 py-3.5 rounded-full border-2 border-[#015196] text-[#015196] font-bold text-sm hover:bg-[#003B6D] hover:text-white transition-all">
+          <button className="rounded-full border-2 border-[#154c8c] px-8 py-3.5 text-sm font-bold text-[#154c8c] transition-all hover:bg-[#0b1735] hover:text-white">
             View all 68,000+ courses
           </button>
         </div>
       </section>
 
       {/* Promo Banner 2 — Teach */}
-      <section className="mx-auto w-[90%] mb-14">
-        <div className="relative overflow-hidden rounded-3xl bg-[#9ca3af]  text-[#003B6D] px-8 py-10 md:px-14 grid md:grid-cols-2 gap-8 items-center">
+      <section className="mx-auto mb-14 w-full max-w-375 px-4 sm:px-6">
+        <div className="relative grid min-h-56 items-center gap-8 overflow-hidden rounded-[30px] bg-[linear-gradient(135deg,#0b1735_0%,#154c8c_38%,#1d3d65_100%)] px-8 py-10 text-white md:grid-cols-2 md:px-14 md:pt-12">
+          <div className="absolute inset-0">
+            <img
+              src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=1600&h=450&fit=crop&auto=format&q=80"
+              alt=""
+              className="h-full w-full object-cover opacity-25"
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(247,185,85,0.24),transparent_24%)]" />
+          </div>
           <div>
-            <p className="text-[#003B6D]/60 text-xs font-bold uppercase tracking-widest mb-2">
+            <p className="relative z-10 mb-3 text-xs font-black uppercase tracking-[0.22em] text-[#f7d28b]">
               💡 Become an instructor
             </p>
-            <h2 className="font-display font-black text-3xl md:text-4xl mb-3">
+            <h2 className="relative z-10 mb-4 font-display text-3xl font-black leading-tight md:text-4xl">
               Teach what you know.
               <br />
               Earn what you deserve.
             </h2>
-            <p className="text-[#003B6D]/70 text-sm mb-6 max-w-sm">
+            <p className="relative z-10 mb-6 max-w-sm text-sm leading-relaxed text-white/80">
               Join 14,000+ instructors earning passive income. Keep 70% of every
               sale. No experience required.
             </p>
             <Link
               to="/signup"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#003B6D] text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-lg"
+              className="relative z-10 inline-flex items-center gap-2 rounded-full bg-[#f7b955] px-6 py-3 text-sm font-bold text-[#0b1735] shadow-[0_20px_35px_rgba(247,185,85,0.28)] transition-all hover:-translate-y-0.5"
             >
               Start teaching today →
             </Link>
           </div>
-          <div className="hidden md:flex justify-end">
-            <div className="relative">
+          <div className="relative z-10 hidden items-end justify-end md:flex">
+            <div className="relative w-56">
               <img
-                src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=400&h=280&fit=crop&auto=format"
-                alt="Instructor"
-                className="rounded-2xl w-72 object-cover shadow-2xl"
+                src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop&auto=format&q=80"
+                alt="Team collaboration"
+                className="w-full h-64 object-cover rounded-2xl shadow-2xl"
               />
-              <div className="absolute -bottom-4 -right-4 bg-white rounded-xl px-4 py-3 shadow-xl border border-gray-100">
+              <div className="absolute -bottom-6 -right-4 bg-white rounded-2xl px-5 py-4 shadow-2xl border border-white/20 w-48">
                 <div className="text-[10px] text-gray-400">
                   Top instructor this month
                 </div>
-                <div className="font-display font-bold text-lg text-[#003B6D]">
+                <div className="font-display font-bold text-2xl text-[#003B6D]">
                   $12,840
                 </div>
                 <div className="text-xs text-green-600 font-semibold">
@@ -673,19 +281,19 @@ export default function Home() {
       </section>
 
       {/* Trending courses */}
-      <section className="mx-auto w-[90%] py-16">
+      <section className="mx-auto w-full max-w-375 px-4 py-16 sm:px-6">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-[#015196]">
+            <p className="mb-1 text-[11px] font-black uppercase tracking-[0.22em] text-[#154c8c]">
               Most Popular
             </p>
-            <h2 className="font-display text-3xl font-bold text-[#1B1F3B] md:text-4xl">
+            <h2 className="font-display text-3xl font-black text-[#0b1735] md:text-4xl">
               Trending courses
             </h2>
           </div>
           <a
             href="#courses"
-            className="hidden text-sm font-semibold text-[#015196] transition-colors hover:text-[#003B6D] sm:block"
+            className="hidden text-sm font-semibold text-[#154c8c] transition-colors hover:text-[#0b1735] sm:block"
           >
             View all courses →
           </a>
@@ -702,17 +310,25 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="bg-linear-to-br from-[#003B6D] to-[#015196] text-white py-16">
-        <div className="mx-auto w-[90%]">
-          <div className="text-center mb-12">
-            <p className="text-[#F5A623] text-xs font-bold uppercase tracking-widest mb-2">
+      <section className="relative min-h-72 overflow-hidden py-16 text-white">
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1600&h=600&fit=crop&auto=format&q=80"
+            alt="Learning background"
+            className="h-full w-full object-cover opacity-35"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,#0b1735_0%,#0b1735_55%,#154c8c_100%)]" />
+        </div>
+        <div className="relative z-10 mx-auto w-full max-w-375 px-4 sm:px-6">
+          <div className="mb-12 text-center">
+            <p className="mb-2 text-xs font-black uppercase tracking-[0.22em] text-[#f7d28b]">
               Get started
             </p>
-            <h2 className="font-display font-bold text-3xl md:text-4xl">
+            <h2 className="font-display text-3xl font-black md:text-4xl">
               Learning made ridiculously simple
             </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-3">
             {[
               {
                 step: "01",
@@ -735,16 +351,16 @@ export default function Home() {
             ].map((s) => (
               <div
                 key={s.step}
-                className="relative bg-white/10 rounded-2xl p-7 border border-white/15 hover:bg-white/15 transition-colors"
+                className="relative rounded-2xl border border-white/15 bg-white/8 p-7 backdrop-blur-sm transition-colors hover:bg-white/12"
               >
-                <span className="absolute top-5 right-6 font-display font-black text-5xl text-white/8 select-none">
+                <span className="absolute right-6 top-5 select-none font-display text-5xl font-black text-white/10">
                   {s.step}
                 </span>
-                <div className="text-3xl mb-4">{s.icon}</div>
-                <h3 className="font-display font-semibold text-xl mb-2">
+                <div className="mb-4 text-3xl">{s.icon}</div>
+                <h3 className="mb-2 font-display text-xl font-semibold">
                   {s.title}
                 </h3>
-                <p className="text-sm text-white/55 leading-relaxed">
+                <p className="text-sm leading-relaxed text-white/65">
                   {s.desc}
                 </p>
               </div>
@@ -757,7 +373,7 @@ export default function Home() {
 
       {/* Testimonials */}
       <section className="py-16 bg-[#F9F8F5]">
-        <div className="mx-auto w-[90%]">
+        <div className="mx-auto w-full max-w-375 px-4 sm:px-6">
           <div className="text-center mb-10">
             {/* <p className="text-xs font-bold uppercase tracking-widest text-[#F5A623] mb-2">
               Student stories
@@ -802,26 +418,42 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-linear-to-br from-[#1B1F3B] to-[#0e1020] text-white py-20">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="text-5xl mb-5">🎓</div>
-          <h2 className="font-display font-black text-4xl md:text-5xl mb-4">
+      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#0b1735_0%,#154c8c_48%,#0f254d_100%)] py-16 sm:py-20 lg:py-24">
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1800&q=80"
+            alt=""
+            className="h-full w-full object-cover object-center opacity-20"
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(247,185,85,0.24),transparent_24%)]" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-5xl px-4 text-center text-white sm:px-6">
+          <div className="mb-5 flex justify-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-3xl shadow-lg ring-1 ring-white/15 backdrop-blur-sm">
+              🎓
+            </div>
+          </div>
+
+          <h2 className="font-display text-4xl font-black leading-none text-white sm:text-5xl lg:text-[5rem]">
             Your next skill is waiting.
           </h2>
-          <p className="text-white/60 mb-8 text-base">
+
+          <p className="mx-auto mt-6 max-w-2xl text-base text-white/85 sm:text-lg">
             Join 2.4 million learners already growing their careers on
             ExpertEdge. First course from $9.99.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               to="/signup"
-              className="px-8 py-4 rounded-full bg-[#015196] text-white font-bold hover:bg-[#003B6D] transition-colors shadow-lg"
+              className="inline-flex items-center justify-center rounded-full bg-[#f7b955] px-8 py-4 text-base font-bold text-[#0b1735] shadow-[0_20px_40px_rgba(247,185,85,0.3)] transition-colors hover:bg-[#f6c779]"
             >
               Get started for free
             </Link>
             <a
               href="#courses"
-              className="px-8 py-4 rounded-full border border-[#015196] text-white hover:bg-[#015196]/20 transition-colors font-semibold"
+              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-8 py-4 text-base font-bold text-white shadow-lg transition-colors hover:bg-white/10"
             >
               Browse courses
             </a>

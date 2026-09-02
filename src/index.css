@@ -45,51 +45,51 @@
   --font-body: "Outfit", system-ui, sans-serif;
 
   /* ExpertEdge Academy - Primary Brand Colors */
-  --color-primary-blue: #015196;
-  --color-deep-blue: #003b6d;
-  --color-secondary-blue: #00549c;
+  --color-primary-blue: #154c8c;
+  --color-deep-blue: #0b1735;
+  --color-secondary-blue: #2b6cb0;
 
   /* ExpertEdge Academy - Secondary Colors */
   --color-academy-gray: #565553;
-  --color-charcoal: #333333;
+  --color-charcoal: #1a2236;
 
   /* ExpertEdge Academy - Neutral Colors */
-  --color-neutral-900: #1f2933;
-  --color-neutral-800: #323a40;
-  --color-neutral-700: #565553;
-  --color-neutral-600: #6b7280;
-  --color-neutral-500: #9ca3af;
-  --color-neutral-400: #d1d5db;
-  --color-neutral-300: #e5e7eb;
-  --color-neutral-200: #edf0f2;
-  --color-neutral-100: #f7f8fa;
+  --color-neutral-900: #101827;
+  --color-neutral-800: #1f2937;
+  --color-neutral-700: #374151;
+  --color-neutral-600: #52607a;
+  --color-neutral-500: #7b8798;
+  --color-neutral-400: #c8d1dc;
+  --color-neutral-300: #e5eaf2;
+  --color-neutral-200: #edf3f8;
+  --color-neutral-100: #f5f7fb;
 
   /* ExpertEdge Academy - System Colors */
-  --color-success: #16a34a;
+  --color-success: #0f9f6e;
   --color-success-light: #dcfce7;
-  --color-warning: #f59e0b;
-  --color-warning-light: #fef3c7;
-  --color-error: #dc2626;
-  --color-error-light: #fee2e2;
+  --color-warning: #f29f05;
+  --color-warning-light: #fff4d6;
+  --color-error: #d92d20;
+  --color-error-light: #fee4e2;
   --color-info: #2563eb;
   --color-info-light: #dbeafe;
 
   /* Light Mode */
-  --background: #f7f8fa;
-  --foreground: #333333;
+  --background: #f5f7fb;
+  --foreground: #182033;
   --card: #ffffff;
-  --card-foreground: #333333;
-  --primary: #015196;
+  --card-foreground: #182033;
+  --primary: #154c8c;
   --primary-foreground: #ffffff;
-  --secondary: #e5e7eb;
-  --secondary-foreground: #333333;
-  --muted: #f7f8fa;
-  --muted-foreground: #777777;
-  --accent: #015196;
-  --accent-foreground: #ffffff;
-  --border: #e5e7eb;
-  --ring: #015196;
-  --radius: 0.5rem;
+  --secondary: #edf3f8;
+  --secondary-foreground: #182033;
+  --muted: #f5f7fb;
+  --muted-foreground: #64748b;
+  --accent: #f7b955;
+  --accent-foreground: #0b1735;
+  --border: #dfe7f1;
+  --ring: #154c8c;
+  --radius: 0.75rem;
 }
 
 .dark {
@@ -116,13 +116,17 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   font-family: var(--font-body);
-  background-color: var(--background);
+  background:
+    radial-gradient(circle at top, rgba(145, 180, 224, 0.18), transparent 24%),
+    linear-gradient(180deg, #f7f9fc 0%, #f3f5f9 100%);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 h1,
@@ -131,6 +135,17 @@ h3,
 h4,
 .font-display {
   font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+img {
+  display: block;
+}
+
+button,
+input,
+a {
+  transition: all 0.2s ease;
 }
 
 ::-webkit-scrollbar {
