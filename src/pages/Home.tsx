@@ -137,7 +137,7 @@ export default function Home() {
               🔥 Weekend sale
             </p>
             <h2 className="mb-2 font-display text-3xl font-black md:text-4xl">
-              All courses <span className="text-[#f7b955]">$9.99</span>
+              All courses <span className="text-[#f7b955]">₦15,000</span>
             </h2>
             <p className="max-w-sm text-sm text-white/75">
               Sale ends Sunday. Over 68,000 courses to choose from.
@@ -269,7 +269,7 @@ export default function Home() {
                   Top instructor this month
                 </div>
                 <div className="font-display font-bold text-2xl text-[#003B6D]">
-                  $12,840
+                  ₦19.3m
                 </div>
                 <div className="text-xs text-green-600 font-semibold">
                   ↑ 28% vs last month
@@ -441,7 +441,7 @@ export default function Home() {
 
           <p className="mx-auto mt-6 max-w-2xl text-base text-white/85 sm:text-lg">
             Join 2.4 million learners already growing their careers on
-            ExpertEdge. First course from $9.99.
+            ExpertEdge. First course from ₦15,000.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

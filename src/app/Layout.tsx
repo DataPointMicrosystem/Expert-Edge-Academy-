@@ -15,7 +15,7 @@ export default function Layout() {
       {/* Announcement bar */}
       <div className="bg-academy-gray text-white text-center text-xs py-2.5 px-4 font-medium">
         🔥 Limited time — all courses from{" "}
-        <strong className="text-info-blue">$9.99</strong> for new learners.{" "}
+        <strong className="text-info-blue">₦15,000</strong> for new learners.{" "}
         <a
           href="#courses"
           className="underline underline-offset-2 opacity-75 hover:opacity-100"

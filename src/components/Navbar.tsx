@@ -88,9 +88,19 @@ export default function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary-blue text-white flex items-center justify-center text-sm font-bold shadow-sm">
+              <Link
+                to="/dashboard"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-blue text-sm font-bold text-white shadow-sm"
+                title="Open dashboard"
+              >
                 {user.name[0]}
-              </div>
+              </Link>
+              <Link
+                to="/dashboard"
+                className="hidden text-sm font-semibold text-slate-700 hover:text-primary-blue sm:block"
+              >
+                Dashboard
+              </Link>
               <button
                 onClick={logout}
                 className="hidden sm:block text-sm text-slate-600 hover:text-slate-900"
@@ -108,7 +118,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/signup"
-                className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-primary-blue text-white shadow-[0_10px_25px_rgba(21,76,140,0.22)] hover:translate-y-[-1px] hover:shadow-[0_12px_30px_rgba(21,76,140,0.28)]"
+                className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-primary-blue text-white shadow-[0_10px_25px_rgba(21,76,140,0.22)] hover:-translate-y-px hover:shadow-[0_12px_30px_rgba(21,76,140,0.28)]"
               >
                 Sign up
               </Link>
@@ -166,6 +176,15 @@ export default function Navbar() {
           >
             Teach
           </Link>
+          {user && (
+            <Link
+              to="/dashboard"
+              className="py-2 text-sm font-semibold text-primary-blue"
+              onClick={() => setMobileOpen(false)}
+            >
+              My dashboard
+            </Link>
+          )}
           {!user && (
             <div className="flex gap-2 pt-1">
               <Link

@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
 import expertedgeLogo from "../../asset/expertedgeLogo.jpg";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo =
+    new URLSearchParams(location.search).get("redirectTo") || "/";
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {},
@@ -33,7 +36,7 @@ export default function Login() {
     setLoading(true);
     setTimeout(() => {
       login(form.email, form.email.split("@")[0]);
-      navigate("/");
+      navigate(redirectTo);
     }, 1000);
   };
 
@@ -64,7 +67,7 @@ export default function Login() {
           <h2 className="font-display font-black text-4xl xl:text-5xl leading-tight mb-5">
             Welcome back.
             <br />
-            <span className="text-primary-blue">Keep learning.</span>
+            <span className="text-[#F5A623]">Keep learning.</span>
           </h2>
           <p className="text-white/60 text-base max-w-sm leading-relaxed">
             Pick up right where you left off. Your courses, notes, and progress
@@ -122,7 +125,7 @@ export default function Login() {
           <p className="text-gray-500 text-sm mb-8">
             New to ExpertEdge?{" "}
             <Link
-              to="/signup"
+              to={`/signup?redirectTo=${encodeURIComponent(redirectTo)}`}
               className="text-charcoal font-semibold hover:text-primary-blue transition-colors underline underline-offset-2"
             >
               Sign up free

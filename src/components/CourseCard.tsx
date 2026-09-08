@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useCart } from "../context/CartContext";
 import type { Course } from "../data/courses";
+import { formatNaira } from "../lib/money";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -115,10 +116,10 @@ export default function CourseCard({
             </div>
             <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-3">
               <span className="text-lg font-black text-slate-900">
-                ${course.price}
+                {formatNaira(course.price)}
               </span>
               <span className="text-xs text-slate-400 line-through">
-                ${course.originalPrice}
+                {formatNaira(course.originalPrice)}
               </span>
               <span className="ml-auto rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700">
                 {discount}% off
@@ -160,7 +161,7 @@ export default function CourseCard({
           </div>
           <div className="mt-auto flex items-center gap-3 border-t border-slate-200 pt-4">
             <span className="font-display text-2xl font-black text-[#0b1735]">
-              ${course.price}
+              {formatNaira(course.price)}
             </span>
             <button
               onClick={() => addToCart(course)}
