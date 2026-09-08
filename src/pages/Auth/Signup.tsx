@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
 import expertedgeLogo from "../../asset/expertedgeLogo.jpg";
 
 export default function Signup() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo =
+    new URLSearchParams(location.search).get("redirectTo") || "/";
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -52,7 +55,7 @@ export default function Signup() {
     setLoading(true);
     setTimeout(() => {
       login(form.email, form.name);
-      navigate("/");
+      navigate(redirectTo);
     }, 1200);
   };
 
@@ -87,7 +90,7 @@ export default function Signup() {
           <p className="text-gray-500 text-sm mb-6">
             Already have an account?{" "}
             <Link
-              to="/login"
+              to={`/login?redirectTo=${encodeURIComponent(redirectTo)}`}
               className="text-charcoal font-semibold hover:text-primary-blue transition-colors underline underline-offset-2"
             >
               Log in
@@ -312,7 +315,7 @@ export default function Signup() {
             <br />
             journey today.
           </h2>
-          <p className="text-[#1B1F3B]/70 text-base max-w-xs leading-relaxed mb-10">
+          <p className="text-color-secondary text-base max-w-xs leading-relaxed mb-10">
             Join 2.4 million learners already growing their skills and careers
             on ExpertEdge.
           </p>
@@ -326,7 +329,7 @@ export default function Signup() {
               { icon: "✓", text: "Learn on any device, anytime" },
             ].map((f) => (
               <div key={f.text} className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-charcoal text-primary-blue flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-6 h-6 rounded-full bg-[#F5A623] text-white flex items-center justify-center text-xs font-bold shrink-0">
                   {f.icon}
                 </div>
                 <span className="text-sm font-semibold text-white">

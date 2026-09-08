@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router";
 import { COURSES } from "../data/courses";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { formatNaira } from "../lib/money";
 
 function StarRating({
   rating,
@@ -31,9 +33,11 @@ export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
   const course = COURSES.find((c) => c.id === id);
   const { addToCart, isInCart } = useCart();
+  const { isEnrolled } = useAuth();
   const navigate = useNavigate();
   const [expandedSection, setExpandedSection] = useState<number | null>(0);
   const inCart = course ? isInCart(course.id) : false;
+  const enrolled = course ? isEnrolled(course.id) : false;
 
   if (!course) {
     return (
@@ -58,6 +62,10 @@ export default function CourseDetail() {
   );
 
   const handleBuyNow = () => {
+    if (enrolled) {
+      navigate(`/courses/${course.id}/lessons`);
+      return;
+    }
     addToCart(course);
     navigate("/cart");
   };
@@ -170,10 +178,10 @@ export default function CourseDetail() {
               <div className="p-5">
                 <div className="flex items-baseline gap-3 mb-1">
                   <span className="font-display font-black text-3xl text-[#1B1F3B]">
-                    ${course.price}
+                    {formatNaira(course.price)}
                   </span>
                   <span className="text-gray-400 line-through text-base">
-                    ${course.originalPrice}
+                    {formatNaira(course.originalPrice)}
                   </span>
                   <span className="text-green-600 font-bold text-sm">
                     {discount}% off
@@ -187,7 +195,7 @@ export default function CourseDetail() {
                   onClick={handleBuyNow}
                   className="w-full py-3.5 rounded-xl bg-[#F5A623] text-[#1B1F3B] font-bold text-sm hover:opacity-90 transition-opacity mb-2 shadow-md"
                 >
-                  Buy now
+                  {enrolled ? "Start course" : "Buy now"}
                 </button>
                 <button
                   onClick={() => addToCart(course)}
@@ -235,10 +243,10 @@ export default function CourseDetail() {
       <div className="lg:hidden sticky top-16 z-40 bg-white border-b border-gray-200 shadow-sm px-4 py-3 flex items-center justify-between gap-3">
         <div>
           <span className="font-display font-black text-xl text-[#1B1F3B]">
-            ${course.price}
+            {formatNaira(course.price)}
           </span>
           <span className="text-xs text-gray-400 line-through ml-2">
-            ${course.originalPrice}
+            {formatNaira(course.originalPrice)}
           </span>
         </div>
         <div className="flex gap-2">
@@ -456,7 +464,9 @@ export default function CourseDetail() {
               onClick={handleBuyNow}
               className="px-6 py-3 rounded-xl bg-[#F5A623] text-[#1B1F3B] font-bold text-sm hover:opacity-90 transition-opacity shadow-md"
             >
-              Enroll now — ${course.price}
+              {enrolled
+                ? "Continue learning"
+                : `Enroll now — ${formatNaira(course.price)}`}
             </button>
             <Link
               to={`/courses/${course.id}/lessons`}

@@ -139,7 +139,7 @@ export function HeroCarousel() {
                     ))}
                   </div>
                   <span className="text-lg font-black text-[#0b1735]">
-                    From $9.99
+                    From ₦15,000
                   </span>
                 </div>
               </div>
