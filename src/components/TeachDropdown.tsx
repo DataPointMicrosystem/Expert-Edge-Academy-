@@ -17,7 +17,7 @@ export default function TeachDropdown() {
       }}
     >
       <Link
-        to="/teach"
+        to="/signup?role=instructor"
         className="text-sm font-medium px-3 py-2 rounded-lg text-neutral-700 hover:text-primary-blue hover:bg-neutral-100 transition-colors"
         aria-haspopup="true"
         aria-expanded={open}
@@ -40,7 +40,7 @@ export default function TeachDropdown() {
             Inspire the next generation of learners.
           </p>
           <Link
-            to="/teach"
+            to="/signup?role=instructor"
             className="mt-4 block rounded-lg bg-primary-blue px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-deep-blue"
             onClick={() => setOpen(false)}
           >

@@ -10,6 +10,7 @@ import CourseLessons from "../pages/CourseLessons";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Dashboard from "../pages/Dashboard";
+import FacilitatorDashboard from "../pages/FacilitatorDashboard";
 
 export const router = createBrowserRouter([
   {
@@ -57,5 +58,9 @@ export const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <Dashboard />,
+  },
+  {
+    path: "/facilitator",
+    element: <FacilitatorDashboard />,
   },
 ]);

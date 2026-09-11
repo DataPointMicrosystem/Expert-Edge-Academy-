@@ -35,8 +35,14 @@ export default function Login() {
     }
     setLoading(true);
     setTimeout(() => {
-      login(form.email, form.email.split("@")[0]);
-      navigate(redirectTo);
+      const signedInUser = login(form.email, form.email.split("@")[0]);
+      navigate(
+        redirectTo !== "/"
+          ? redirectTo
+          : signedInUser.role === "instructor"
+            ? "/facilitator"
+            : "/dashboard",
+      );
     }, 1000);
   };
 

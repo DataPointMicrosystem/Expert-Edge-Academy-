@@ -7,13 +7,14 @@ export default function Signup() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const requestedRole = new URLSearchParams(location.search).get("role");
   const redirectTo =
     new URLSearchParams(location.search).get("redirectTo") || "/";
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    role: "learner" as "learner" | "instructor",
+    role: requestedRole === "instructor" ? "instructor" : "learner",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -54,8 +55,14 @@ export default function Signup() {
     }
     setLoading(true);
     setTimeout(() => {
-      login(form.email, form.name);
-      navigate(redirectTo);
+      const signedInUser = login(form.email, form.name, form.role);
+      navigate(
+        redirectTo !== "/"
+          ? redirectTo
+          : signedInUser.role === "instructor"
+            ? "/facilitator"
+            : "/dashboard",
+      );
     }, 1200);
   };
 

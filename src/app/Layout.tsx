@@ -13,14 +13,15 @@ export default function Layout() {
   return (
     <div>
       {/* Announcement bar */}
-      <div className="bg-academy-gray text-white text-center text-xs py-2.5 px-4 font-medium">
-        🔥 Limited time — all courses from{" "}
-        <strong className="text-info-blue">₦15,000</strong> for new learners.{" "}
+      <div className="flex items-center justify-center gap-2 bg-[#0b1735] px-4 py-2.5 text-center text-xs font-medium text-white/80">
+        <span className="text-[#f7b955]" aria-hidden="true">✦</span>
+        <span>Limited time — all courses from{" "}
+        <strong className="text-[#f7b955]">₦15,000</strong> for new learners.</span>{" "}
         <a
           href="#courses"
-          className="underline underline-offset-2 opacity-75 hover:opacity-100"
+          className="font-bold text-white underline decoration-[#f7b955] underline-offset-2 transition hover:text-[#f7b955]"
         >
-          Shop now →
+          Shop now
         </a>
       </div>
       <Navbar />

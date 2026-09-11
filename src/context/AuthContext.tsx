@@ -10,6 +10,7 @@ interface User {
   name: string;
   email: string;
   avatar?: string;
+  role: "learner" | "instructor";
 }
 
 export interface Purchase {
@@ -21,7 +22,7 @@ export interface Purchase {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, name?: string) => void;
+  login: (email: string, name?: string, role?: User["role"]) => User;
   logout: () => void;
   updateProfile: (profile: { name: string; email: string }) => void;
   enroll: (courseIds: string[], purchases?: Purchase[]) => void;
@@ -39,7 +40,12 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     try {
-      return JSON.parse(localStorage.getItem("currentUser") || "null");
+      const storedUser = JSON.parse(
+        localStorage.getItem("currentUser") || "null",
+      );
+      return storedUser
+        ? { ...storedUser, role: storedUser.role || "learner" }
+        : null;
     } catch {
       return null;
     }
@@ -74,11 +80,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = (email: string, name = "Learner") => {
-    const nextUser = { name, email };
+  const login = (
+    email: string,
+    name = "Learner",
+    role?: User["role"],
+  ) => {
+    const storedRole = localStorage.getItem(accountKey(email, "role"));
+    const nextUser: User = {
+      name,
+      email,
+      role: role || (storedRole === "instructor" ? "instructor" : "learner"),
+    };
     setUser(nextUser);
     localStorage.setItem("currentUser", JSON.stringify(nextUser));
+    localStorage.setItem(accountKey(email, "role"), nextUser.role);
     loadAccountData(email);
+    return nextUser;
   };
 
   const logout = () => {
@@ -90,7 +107,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = (profile: { name: string; email: string }) => {
+    if (!user) return;
+
     const nextUser = { ...user, ...profile };
+    if (profile.email !== user.email) {
+      for (const key of [
+        "role",
+        "enrolledCourseIds",
+        "purchases",
+        "completedCourseIds",
+      ]) {
+        const previousKey = accountKey(user.email, key);
+        const nextKey = accountKey(profile.email, key);
+        const storedValue = localStorage.getItem(previousKey);
+        if (storedValue !== null) localStorage.setItem(nextKey, storedValue);
+      }
+    }
     setUser(nextUser);
     localStorage.setItem("currentUser", JSON.stringify(nextUser));
   };

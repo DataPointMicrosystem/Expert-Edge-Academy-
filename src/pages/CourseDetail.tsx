@@ -298,7 +298,7 @@ export default function CourseDetail() {
           </div>
 
           {/* Requirements */}
-          <div>
+          <div id="curriculum">
             <h2 className="font-display font-bold text-xl text-[#1B1F3B] mb-4">
               Requirements
             </h2>
@@ -469,10 +469,10 @@ export default function CourseDetail() {
                 : `Enroll now — ${formatNaira(course.price)}`}
             </button>
             <Link
-              to={`/courses/${course.id}/lessons`}
+              to="#curriculum"
               className="px-6 py-3 rounded-xl border border-white/25 font-bold text-sm hover:bg-white/10 transition-colors"
             >
-              Preview for free
+              View curriculum
             </Link>
           </div>
         </div>

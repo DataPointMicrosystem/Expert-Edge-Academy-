@@ -1,13 +1,12 @@
-import { Link, Navigate, useNavigate } from "react-router";
+import { Link, Navigate } from "react-router";
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { formatNaira } from "../lib/money";
 
 export default function Checkout() {
-  const { items, total } = useCart();
+  const { items, total, clearCart } = useCart();
   const { user, enroll } = useAuth();
-  const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
 
   if (!user) {
@@ -93,8 +92,7 @@ export default function Checkout() {
                   purchasedAt: new Date().toISOString(),
                 })),
               );
-              const firstCourseId = items[0].id;
-              navigate(`/courses/${firstCourseId}/lessons`);
+              clearCart();
               setSubmitted(true);
             }}
             className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"

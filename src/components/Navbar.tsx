@@ -19,13 +19,13 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl shadow-[0_10px_30px_rgba(11,23,53,0.04)]">
-      <div className="max-w-375 mx-auto w-full px-4 sm:px-6 flex items-center gap-8 h-18">
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 shadow-[0_10px_30px_rgba(11,23,53,0.04)] backdrop-blur-xl">
+      <div className="mx-auto flex h-[4.5rem] w-full max-w-375 items-center gap-5 px-4 sm:gap-8 sm:px-6">
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
           <img
             src={expertedgeLogo}
             alt="ExpertEdge Academy"
-            className="h-10 w-auto object-contain"
+            className="h-9 w-auto object-contain sm:h-10"
           />
         </Link>
 
@@ -49,7 +49,7 @@ export default function Navbar() {
               onChange={(e) => setSearch(e.target.value)}
               type="text"
               placeholder="Search for courses"
-              className="w-full pl-10 pr-4 py-2.5 rounded-full border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:border-primary-blue focus:bg-white focus:outline-none placeholder:text-slate-500"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-primary-blue focus:bg-white focus:ring-4 focus:ring-blue-100"
             />
           </div>
         </form>
@@ -62,7 +62,8 @@ export default function Navbar() {
         <div className="flex items-center gap-2 ml-auto">
           <Link
             to="/cart"
-            className="relative p-2.5 rounded-xl text-slate-700 hover:bg-slate-100"
+            aria-label={`Shopping cart${count > 0 ? `, ${count} items` : ""}`}
+            className="relative rounded-xl p-2.5 text-slate-700 hover:bg-slate-100"
           >
             <svg
               className="w-5 h-5"
@@ -126,7 +127,8 @@ export default function Navbar() {
           )}
 
           <button
-            className="lg:hidden p-2 rounded-lg hover:bg-slate-100"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
             onClick={() => setMobileOpen((o) => !o)}
           >
             <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
@@ -170,7 +172,7 @@ export default function Navbar() {
             Explore
           </Link>
           <Link
-            to="/teach"
+            to="/signup?role=instructor"
             className="py-2 text-sm font-medium text-neutral-700"
             onClick={() => setMobileOpen(false)}
           >
