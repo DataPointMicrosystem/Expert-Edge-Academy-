@@ -13,6 +13,8 @@ interface User {
   role: "learner" | "instructor";
 }
 
+export type NotificationChannel = "email" | "app" | "sms";
+
 export interface Purchase {
   courseId: string;
   title: string;
@@ -22,9 +24,12 @@ export interface Purchase {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, name?: string, role?: User["role"]) => User;
+  login: (email: string, name?: string, role?: User["role"], password?: string) => User;
   logout: () => void;
   updateProfile: (profile: { name: string; email: string }) => void;
+  notificationChannel: NotificationChannel;
+  setNotificationChannel: (channel: NotificationChannel) => void;
+  changePassword: (currentPassword: string, newPassword: string) => string | null;
   enroll: (courseIds: string[], purchases?: Purchase[]) => void;
   isEnrolled: (courseId: string) => boolean;
   purchases: Purchase[];
@@ -53,6 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [completedCourseIds, setCompletedCourseIds] = useState<string[]>([]);
+  const [notificationChannel, setNotificationChannelState] =
+    useState<NotificationChannel>("email");
 
   const accountKey = (email: string, key: string) => `${key}:${email}`;
 
@@ -73,6 +80,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.getItem(accountKey(email, "completedCourseIds")) || "[]",
         ),
       );
+      const storedChannel = localStorage.getItem(
+        accountKey(email, "notificationChannel"),
+      );
+      setNotificationChannelState(
+        storedChannel === "app" || storedChannel === "sms" ? storedChannel : "email",
+      );
     } catch {
       setEnrolledCourseIds([]);
       setPurchases([]);
@@ -84,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     name = "Learner",
     role?: User["role"],
+    password?: string,
   ) => {
     const storedRole = localStorage.getItem(accountKey(email, "role"));
     const nextUser: User = {
@@ -94,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(nextUser);
     localStorage.setItem("currentUser", JSON.stringify(nextUser));
     localStorage.setItem(accountKey(email, "role"), nextUser.role);
+    if (password) localStorage.setItem(accountKey(email, "password"), password);
     loadAccountData(email);
     return nextUser;
   };
@@ -103,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setEnrolledCourseIds([]);
     setPurchases([]);
     setCompletedCourseIds([]);
+    setNotificationChannelState("email");
     localStorage.removeItem("currentUser");
   };
 
@@ -116,6 +132,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         "enrolledCourseIds",
         "purchases",
         "completedCourseIds",
+        "notificationChannel",
+        "password",
       ]) {
         const previousKey = accountKey(user.email, key);
         const nextKey = accountKey(profile.email, key);
@@ -125,6 +143,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(nextUser);
     localStorage.setItem("currentUser", JSON.stringify(nextUser));
+  };
+
+  const setNotificationChannel = (channel: NotificationChannel) => {
+    if (!user) return;
+    setNotificationChannelState(channel);
+    localStorage.setItem(accountKey(user.email, "notificationChannel"), channel);
+  };
+
+  const changePassword = (currentPassword: string, newPassword: string) => {
+    if (!user) return "You must be signed in to change your password.";
+    const storedPassword = localStorage.getItem(accountKey(user.email, "password"));
+    if (storedPassword && storedPassword !== currentPassword) {
+      return "Your current password is incorrect.";
+    }
+    localStorage.setItem(accountKey(user.email, "password"), newPassword);
+    return null;
   };
 
   const enroll = (courseIds: string[], newPurchases: Purchase[] = []) => {
@@ -187,6 +221,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         updateProfile,
+        notificationChannel,
+        setNotificationChannel,
+        changePassword,
         enroll,
         isEnrolled,
         purchases,

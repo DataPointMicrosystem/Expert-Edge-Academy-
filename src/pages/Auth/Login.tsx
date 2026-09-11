@@ -35,7 +35,12 @@ export default function Login() {
     }
     setLoading(true);
     setTimeout(() => {
-      const signedInUser = login(form.email, form.email.split("@")[0]);
+      const signedInUser = login(
+        form.email,
+        form.email.split("@")[0],
+        undefined,
+        form.password,
+      );
       navigate(
         redirectTo !== "/"
           ? redirectTo

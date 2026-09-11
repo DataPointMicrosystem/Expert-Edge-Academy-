@@ -40,7 +40,7 @@ export default function TeachDropdown() {
             Inspire the next generation of learners.
           </p>
           <Link
-            to="/signup?role=instructor"
+            to="/teach"
             className="mt-4 block rounded-lg bg-primary-blue px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-deep-blue"
             onClick={() => setOpen(false)}
           >

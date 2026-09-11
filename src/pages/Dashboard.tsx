@@ -5,6 +5,7 @@ import { Link, Navigate } from "react-router"
 import { COURSES } from "../data/courses"
 
 import { useAuth } from "../context/AuthContext"
+import type { NotificationChannel } from "../context/AuthContext"
 
 import { formatNaira } from "../lib/money"
 
@@ -28,6 +29,30 @@ const testAnswers = [
   "After completing the lessons",
 ]
 
+const learnerNotifications = [
+  {
+    id: "course-progress",
+    title: "Keep your learning moving",
+    message: "You are making great progress. Continue your course when you are ready.",
+    time: "Today",
+    type: "Learning",
+  },
+  {
+    id: "certificate-ready",
+    title: "Your certificate is waiting",
+    message: "Complete your final assessment to unlock your course certificate.",
+    time: "Yesterday",
+    type: "Achievement",
+  },
+  {
+    id: "new-courses",
+    title: "New courses are available",
+    message: "Explore the marketplace to discover your next learning opportunity.",
+    time: "3 days ago",
+    type: "Marketplace",
+  },
+]
+
 export default function Dashboard() {
   const {
     user,
@@ -37,10 +62,11 @@ export default function Dashboard() {
     purchases,
 
     referralCode,
-
     referralBalance,
 
     updateProfile,
+    notificationChannel,
+    setNotificationChannel,
 
     markCourseComplete,
 
@@ -48,7 +74,9 @@ export default function Dashboard() {
   } = useAuth()
 
   const [activeTab, setActiveTab] =
-    useState<"learning" | "history" | "referrals" | "settings">("learning")
+    useState<
+      "learning" | "history" | "referrals" | "notifications" | "settings"
+    >("learning")
 
   const [lessonCourseId, setLessonCourseId] = useState<string | null>(null)
 
@@ -69,6 +97,20 @@ export default function Dashboard() {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
 
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
+
+  const [settingsSection, setSettingsSection] = useState<
+    "profile" | "notifications" | "password"
+  >("profile")
+
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+
+  const [passwordError, setPasswordError] = useState("")
+
+  const [readNotifications, setReadNotifications] = useState<string[]>([])
 
   if (!user)
     return (
@@ -122,6 +164,36 @@ export default function Dashboard() {
     updateProfile(profile)
 
     setTestMessage("Profile settings saved.")
+  }
+
+  const savePassword = (event: React.FormEvent) => {
+    event.preventDefault()
+    setPasswordError("")
+
+    if (!passwordForm.currentPassword) {
+      setPasswordError("Enter your current password.")
+      return
+    }
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError("Your new password must be at least 8 characters.")
+      return
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("Your new passwords do not match.")
+      return
+    }
+
+    const error = changePassword(
+      passwordForm.currentPassword,
+      passwordForm.newPassword,
+    )
+    if (error) {
+      setPasswordError(error)
+      return
+    }
+
+    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
+    setTestMessage("Password changed successfully.")
   }
 
   return (
@@ -198,12 +270,6 @@ export default function Dashboard() {
                 >
                   Back to marketplace
                 </Link>
-                <Link
-                  to="/facilitator"
-                  className="flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Facilitator studio
-                </Link>
                 <button
                   onClick={() => {
                     setAccountMenuOpen(false)
@@ -258,11 +324,15 @@ export default function Dashboard() {
 
               ["referrals", "Referral & earnings"],
 
+              ["notifications", "Notifications"],
+
               ["settings", "Profile settings"],
             ].map(([value, label]) => (
               <button
                 key={value}
-                onClick={() => setActiveTab(value as typeof activeTab)}
+                onClick={() => {
+                  setActiveTab(value as typeof activeTab)
+                }}
                 className={`whitespace-nowrap rounded-xl px-4 py-3 text-left text-sm font-bold transition ${
                   activeTab === value
                     ? "bg-[#17213D] text-white"
@@ -430,47 +500,198 @@ export default function Dashboard() {
               />
             )}
 
+            {activeTab === "notifications" && (
+              <div className="max-w-3xl border border-slate-200 bg-white">
+                <div className="flex flex-col justify-between gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center">
+                  <div>
+                    <p className="text-sm font-semibold text-primary-blue">Your inbox</p>
+                    <h2 className="mt-1 text-2xl font-black text-[#17213D]">
+                      Notifications
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Stay up to date with your learning activity and account.
+                    </p>
+                  </div>
+                  {readNotifications.length < learnerNotifications.length && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setReadNotifications(learnerNotifications.map((notification) => notification.id))
+                      }
+                      className="text-left text-sm font-bold text-primary-blue hover:underline sm:text-right"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {learnerNotifications.map((notification) => {
+                    const isRead = readNotifications.includes(notification.id)
+
+                    return (
+                      <button
+                        key={notification.id}
+                        type="button"
+                        onClick={() =>
+                          setReadNotifications((current) =>
+                            current.includes(notification.id)
+                              ? current
+                              : [...current, notification.id],
+                          )
+                        }
+                        className={`flex w-full gap-4 p-5 text-left transition hover:bg-slate-50 ${isRead ? "" : "bg-blue-50/50"}`}
+                      >
+                        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${isRead ? "bg-slate-200" : "bg-primary-blue"}`} />
+                        <span className="min-w-0 flex-1">
+                          <span className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-sm font-bold text-[#17213D]">{notification.title}</span>
+                            <span className="text-xs text-slate-400">{notification.time}</span>
+                          </span>
+                          <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-primary-blue">{notification.type}</span>
+                          <span className="mt-2 block text-sm leading-6 text-slate-600">{notification.message}</span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {activeTab === "settings" && (
-              <form
-                onSubmit={saveProfile}
-                className="max-w-2xl border border-slate-200 bg-white p-6"
-              >
+              <div className="max-w-3xl border border-slate-200 bg-white p-6">
                 <h2 className="text-2xl font-black text-[#17213D]">
                   Profile settings
                 </h2>
                 <p className="mt-2 text-sm text-slate-500">
-                  Update the details shown on your learner account.
+                  Manage your account details, notifications, and password.
                 </p>
-                <label className="mt-6 block text-sm font-bold text-slate-700">
-                  Full name
-                  <input
-                    value={profile.name}
-                    onChange={(event) =>
-                      setProfile({ ...profile, name: event.target.value })
-                    }
-                    className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
-                  />
-                </label>
-                <label className="mt-4 block text-sm font-bold text-slate-700">
-                  Email address
-                  <input
-                    type="email"
-                    value={profile.email}
-                    onChange={(event) =>
-                      setProfile({ ...profile, email: event.target.value })
-                    }
-                    className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
-                  />
-                </label>
-                <button className="mt-6 bg-primary-blue px-5 py-3 text-sm font-bold text-white hover:bg-[#0b1735]">
-                  Save settings
-                </button>
+                <div className="mt-6 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+                  {[
+                    ["profile", "Profile details"],
+                    ["notifications", "Notification settings"],
+                    ["password", "Change password"],
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        setSettingsSection(value as typeof settingsSection)
+                        setTestMessage("")
+                        setPasswordError("")
+                      }}
+                      className={`rounded-xl px-4 py-2.5 text-sm font-bold transition ${settingsSection === value ? "bg-[#17213D] text-white" : "text-slate-600 hover:bg-slate-50"}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                {settingsSection === "profile" && (
+                  <form onSubmit={saveProfile}>
+                    <label className="mt-6 block text-sm font-bold text-slate-700">
+                      Full name
+                      <input
+                        value={profile.name}
+                        onChange={(event) =>
+                          setProfile({ ...profile, name: event.target.value })
+                        }
+                        className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
+                      />
+                    </label>
+                    <label className="mt-4 block text-sm font-bold text-slate-700">
+                      Email address
+                      <input
+                        type="email"
+                        value={profile.email}
+                        onChange={(event) =>
+                          setProfile({ ...profile, email: event.target.value })
+                        }
+                        className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
+                      />
+                    </label>
+                    <button className="mt-6 bg-primary-blue px-5 py-3 text-sm font-bold text-white hover:bg-[#0b1735]">
+                      Save settings
+                    </button>
+                  </form>
+                )}
+
+                {settingsSection === "notifications" && (
+                  <div className="mt-6" aria-labelledby="notification-settings-title">
+                    <h3 id="notification-settings-title" className="text-lg font-black text-[#17213D]">
+                      Notification settings
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Choose where you want to receive account and learning updates.
+                    </p>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Notification channel">
+                      {[
+                        ["email", "Email", "Receive updates in your inbox."],
+                        ["app", "App", "Receive alerts in the app."],
+                        ["sms", "SMS", "Receive updates by text message."],
+                      ].map(([value, label, description]) => (
+                        <label
+                          key={value}
+                          className={`cursor-pointer rounded-xl border p-4 transition focus-within:ring-2 focus-within:ring-primary-blue/30 ${notificationChannel === value ? "border-primary-blue bg-blue-50" : "border-slate-200 hover:border-slate-300"}`}
+                        >
+                          <input
+                            type="radio"
+                            name="notificationChannel"
+                            value={value}
+                            checked={notificationChannel === value}
+                            onChange={() => {
+                              setNotificationChannel(value as NotificationChannel)
+                              setTestMessage("Notification preference saved.")
+                            }}
+                            className="sr-only"
+                          />
+                          <span className="flex items-center justify-between gap-2 text-sm font-bold text-[#17213D]">
+                            {label}
+                            {notificationChannel === value && (
+                              <span className="text-xs font-bold text-primary-blue">Selected</span>
+                            )}
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-slate-500">{description}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {settingsSection === "password" && (
+                  <form onSubmit={savePassword} className="mt-6 max-w-xl">
+                    <h3 className="text-lg font-black text-[#17213D]">
+                      Change password
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Use at least 8 characters for your new password.
+                    </p>
+                    <PasswordField
+                      label="Current password"
+                      value={passwordForm.currentPassword}
+                      onChange={(value) => setPasswordForm({ ...passwordForm, currentPassword: value })}
+                    />
+                    <PasswordField
+                      label="New password"
+                      value={passwordForm.newPassword}
+                      onChange={(value) => setPasswordForm({ ...passwordForm, newPassword: value })}
+                    />
+                    <PasswordField
+                      label="Confirm new password"
+                      value={passwordForm.confirmPassword}
+                      onChange={(value) => setPasswordForm({ ...passwordForm, confirmPassword: value })}
+                    />
+                    {passwordError && <p className="mt-3 text-sm font-semibold text-red-600">{passwordError}</p>}
+                    <button className="mt-5 bg-primary-blue px-5 py-3 text-sm font-bold text-white hover:bg-[#0b1735]">
+                      Update password
+                    </button>
+                  </form>
+                )}
                 {testMessage && (
                   <p className="mt-3 text-sm font-semibold text-emerald-700">
                     {testMessage}
                   </p>
                 )}
-              </form>
+              </div>
             )}
           </section>
         </div>
@@ -508,6 +729,28 @@ export default function Dashboard() {
         </div>
       )}
     </main>
+  )
+}
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <label className="mt-4 block text-sm font-bold text-slate-700">
+      {label}
+      <input
+        type="password"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
+      />
+    </label>
   )
 }
 

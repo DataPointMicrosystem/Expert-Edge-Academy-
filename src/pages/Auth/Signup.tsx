@@ -55,7 +55,7 @@ export default function Signup() {
     }
     setLoading(true);
     setTimeout(() => {
-      const signedInUser = login(form.email, form.name, form.role);
+      const signedInUser = login(form.email, form.name, form.role, form.password);
       navigate(
         redirectTo !== "/"
           ? redirectTo
