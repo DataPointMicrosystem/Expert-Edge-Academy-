@@ -3,6 +3,7 @@ import Layout from "./Layout";
 import Home from "../pages/Home";
 import Login from "../pages/Auth/Login";
 import Signup from "../pages/Auth/Signup";
+import VerifyEmail from "../pages/Auth/VerifyEmail";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import CourseDetail from "../pages/CourseDetail";
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
   {
     path: "/signup",
     element: <Signup />,
+  },
+  {
+    path: "/verify-email",
+    element: <VerifyEmail />,
   },
   {
     path: "/forgot-password",
