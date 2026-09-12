@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { useAuth } from "../../context/AuthContext";
 import expertedgeLogo from "../../asset/expertedgeLogo.jpg";
 
 export default function Signup() {
-  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const requestedRole = new URLSearchParams(location.search).get("role");
@@ -55,14 +53,17 @@ export default function Signup() {
     }
     setLoading(true);
     setTimeout(() => {
-      const signedInUser = login(form.email, form.name, form.role, form.password);
-      navigate(
-        redirectTo !== "/"
-          ? redirectTo
-          : signedInUser.role === "instructor"
-            ? "/facilitator"
-            : "/dashboard",
+      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      localStorage.setItem(
+        "pendingEmailVerification",
+        JSON.stringify({
+          ...form,
+          otp,
+          redirectTo,
+          expiresAt: Date.now() + 10 * 60 * 1000,
+        }),
       );
+      navigate(`/verify-email?email=${encodeURIComponent(form.email)}`);
     }, 1200);
   };
 
