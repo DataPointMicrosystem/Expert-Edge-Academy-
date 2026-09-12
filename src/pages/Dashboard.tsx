@@ -198,7 +198,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-slate-900">
-      <div className="border-b border-slate-200 bg-white">
+      <div className="sticky top-0 z-50 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-[4.25rem] max-w-360 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link
             to="/"

@@ -112,7 +112,7 @@ export default function FacilitatorDashboard() {
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-[4.25rem] max-w-360 items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-3">
             <img
