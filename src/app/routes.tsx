@@ -10,6 +10,8 @@ import CourseLessons from "../pages/CourseLessons";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Dashboard from "../pages/Dashboard";
+import FacilitatorDashboard from "../pages/FacilitatorDashboard";
+import TeachOnExpertEdge from "../pages/TeachOnExpertEdge";
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +38,10 @@ export const router = createBrowserRouter([
         path: "checkout",
         element: <Checkout />,
       },
+      {
+        path: "teach",
+        element: <TeachOnExpertEdge />,
+      },
     ],
   },
   {
@@ -57,5 +63,9 @@ export const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <Dashboard />,
+  },
+  {
+    path: "/facilitator",
+    element: <FacilitatorDashboard />,
   },
 ]);

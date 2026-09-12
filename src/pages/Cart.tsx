@@ -17,19 +17,23 @@ export default function Cart() {
   };
 
   return (
-    <main className="min-h-[70vh] bg-slate-50 px-4 py-12 sm:px-6 lg:py-16">
+    <main className="min-h-[70vh] bg-transparent px-4 py-10 sm:px-6 sm:py-14 lg:py-16">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-10">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-primary-blue">
+        <div className="mb-8 border-b border-slate-200/80 pb-8 sm:mb-10">
+          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.22em] text-primary-blue">
             Your learning plan
           </p>
-          <h1 className="text-3xl font-bold tracking-tight text-[#0b1735] sm:text-4xl">
+          <h1 className="font-display text-4xl font-black tracking-tight text-[#0b1735] sm:text-5xl">
             Shopping cart
           </h1>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
+            Keep your next skill within reach. Review your courses and continue
+            when you are ready.
+          </p>
         </div>
 
         {items.length === 0 ? (
-          <section className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+          <section className="rounded-[26px] border border-slate-200/80 bg-white px-6 py-20 text-center shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-primary-blue">
               <svg
                 className="h-8 w-8"
@@ -59,16 +63,16 @@ export default function Cart() {
             </p>
             <Link
               to="/"
-              className="mt-7 inline-flex rounded-xl bg-primary-blue px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b1735]"
+              className="mt-7 inline-flex rounded-xl bg-primary-blue px-5 py-3 text-sm font-bold text-white shadow-[0_12px_24px_rgba(21,76,140,0.2)] transition hover:-translate-y-0.5 hover:bg-[#0b1735]"
             >
               Explore courses
             </Link>
           </section>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
-                <h2 className="font-bold text-[#0b1735]">
+            <section className="overflow-hidden rounded-[26px] border border-slate-200/80 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+              <div className="flex items-center justify-between border-b border-slate-200/80 bg-slate-50/70 px-5 py-4 sm:px-6">
+                <h2 className="font-display text-lg font-black text-[#0b1735]">
                   {items.length} {items.length === 1 ? "course" : "courses"}
                 </h2>
                 <button
@@ -79,13 +83,13 @@ export default function Cart() {
                   Clear cart
                 </button>
               </div>
-              <div className="divide-y divide-slate-200">
+              <div className="divide-y divide-slate-200/80">
                 {items.map((item) => (
-                  <article key={item.id} className="flex gap-4 p-5 sm:p-6">
+                  <article key={item.id} className="flex gap-4 p-5 transition-colors hover:bg-slate-50/70 sm:p-6">
                     <img
                       src={`https://images.unsplash.com/${item.image}?w=480&h=270&fit=crop&auto=format`}
                       alt={item.title}
-                      className="h-20 w-28 shrink-0 rounded-lg object-cover sm:h-24 sm:w-36"
+                      className="h-20 w-28 shrink-0 rounded-xl object-cover ring-1 ring-slate-200 sm:h-24 sm:w-36"
                     />
                     <div className="min-w-0 flex-1">
                       <h3 className="font-bold leading-5 text-[#0b1735]">
@@ -112,8 +116,11 @@ export default function Cart() {
               </div>
             </section>
 
-            <aside className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-[#0b1735]">
+            <aside className="rounded-[26px] border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] lg:sticky lg:top-24">
+              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.2em] text-primary-blue">
+                Ready when you are
+              </p>
+              <h2 className="font-display text-2xl font-black text-[#0b1735]">
                 Order summary
               </h2>
               <div className="mt-6 flex items-center justify-between border-b border-slate-200 pb-4 text-sm text-slate-600">
@@ -127,7 +134,7 @@ export default function Cart() {
               <button
                 type="button"
                 onClick={proceedToCheckout}
-                className="w-full rounded-xl bg-primary-blue px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#0b1735]"
+                className="w-full rounded-xl bg-primary-blue px-5 py-3.5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(21,76,140,0.22)] transition hover:-translate-y-0.5 hover:bg-[#0b1735]"
               >
                 Proceed to checkout
               </button>

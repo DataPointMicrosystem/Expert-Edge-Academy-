@@ -17,7 +17,7 @@ export default function TeachDropdown() {
       }}
     >
       <Link
-        to="/teach"
+        to="/signup?role=instructor"
         className="text-sm font-medium px-3 py-2 rounded-lg text-neutral-700 hover:text-primary-blue hover:bg-neutral-100 transition-colors"
         aria-haspopup="true"
         aria-expanded={open}

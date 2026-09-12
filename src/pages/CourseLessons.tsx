@@ -1,23 +1,52 @@
-import { useState } from "react";
-import { useParams, Link, Navigate } from "react-router";
-import { COURSES } from "../data/courses";
-import { useAuth } from "../context/AuthContext";
+import { useState } from "react"
 
-export default function CourseLessons() {
-  const { id } = useParams<{ id: string }>();
-  const course = COURSES.find((c) => c.id === id);
-  const { user, isEnrolled } = useAuth();
-  const [activeSection, setActiveSection] = useState(0);
-  const [activeLecture, setActiveLecture] = useState(0);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [noteText, setNoteText] = useState("");
-  const [notes, setNotes] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "notes" | "qa" | "resources"
-  >("overview");
+import { useParams, Link, Navigate } from "react-router"
+
+import { COURSES } from "../data/courses"
+
+import { useAuth } from "../context/AuthContext"
+
+interface CourseLessonsProps {
+  courseId?: string
+
+  embedded?: boolean
+
+  onBack?: () => void
+}
+
+export default function CourseLessons({
+  courseId,
+
+  embedded = false,
+
+  onBack,
+}: CourseLessonsProps) {
+  const { id: routeCourseId } = useParams<{ id: string }>()
+
+  const id = courseId ?? routeCourseId
+
+  const course = COURSES.find((c) => c.id === id)
+
+  const { user, isEnrolled } = useAuth()
+
+  const [activeSection, setActiveSection] = useState(0)
+
+  const [activeLecture, setActiveLecture] = useState(0)
+
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window === "undefined" ? true : window.innerWidth >= 768,
+  )
+
+  const [noteText, setNoteText] = useState("")
+
+  const [notes, setNotes] = useState<string[]>([])
+
+  const [activeTab, setActiveTab] =
+    useState<"overview" | "notes" | "qa" | "resources">("overview")
+
   const [completedLectures, setCompletedLectures] = useState<Set<number>>(
     new Set([1, 2]),
-  );
+  )
 
   if (!course) {
     return (
@@ -32,7 +61,7 @@ export default function CourseLessons() {
           </Link>
         </div>
       </div>
-    );
+    )
   }
 
   if (!user) {
@@ -41,78 +70,113 @@ export default function CourseLessons() {
         to={`/login?redirectTo=${encodeURIComponent(`/courses/${course.id}/lessons`)}`}
         replace
       />
-    );
+    )
   }
 
   if (!isEnrolled(course.id)) {
-    return <Navigate to={`/courses/${course.id}`} replace />;
+    return <Navigate to={`/courses/${course.id}`} replace />
   }
 
-  const allLectures = course.sections.flatMap((s) => s.lectures);
-  const currentLecture =
-    course.sections[activeSection]?.lectures[activeLecture];
+  const allLectures = course.sections.flatMap((s) => s.lectures)
+
+  const currentLecture = course.sections[activeSection]?.lectures[activeLecture]
+
   const currentGlobalIdx =
     course.sections
+
       .slice(0, activeSection)
-      .reduce((sum, s) => sum + s.lectures.length, 0) + activeLecture;
-  const totalLectures = allLectures.length;
-  const progress = Math.round((completedLectures.size / totalLectures) * 100);
+
+      .reduce((sum, s) => sum + s.lectures.length, 0) + activeLecture
+
+  const totalLectures = allLectures.length
+
+  const progress = Math.round((completedLectures.size / totalLectures) * 100)
 
   const goNext = () => {
-    const section = course.sections[activeSection];
+    const section = course.sections[activeSection]
+
     if (activeLecture < section.lectures.length - 1) {
-      setActiveLecture((l) => l + 1);
+      setActiveLecture((l) => l + 1)
     } else if (activeSection < course.sections.length - 1) {
-      setActiveSection((s) => s + 1);
-      setActiveLecture(0);
+      setActiveSection((s) => s + 1)
+
+      setActiveLecture(0)
     }
-  };
+  }
 
   const goPrev = () => {
     if (activeLecture > 0) {
-      setActiveLecture((l) => l - 1);
+      setActiveLecture((l) => l - 1)
     } else if (activeSection > 0) {
-      setActiveSection((s) => s - 1);
-      setActiveLecture(course.sections[activeSection - 1].lectures.length - 1);
+      setActiveSection((s) => s - 1)
+
+      setActiveLecture(course.sections[activeSection - 1].lectures.length - 1)
     }
-  };
+  }
 
   const toggleComplete = () => {
     setCompletedLectures((prev) => {
-      const next = new Set(prev);
-      if (next.has(currentGlobalIdx)) next.delete(currentGlobalIdx);
-      else next.add(currentGlobalIdx);
-      return next;
-    });
-  };
+      const next = new Set(prev)
+
+      if (next.has(currentGlobalIdx)) next.delete(currentGlobalIdx)
+      else next.add(currentGlobalIdx)
+
+      return next
+    })
+  }
 
   const addNote = () => {
     if (noteText.trim()) {
       setNotes((prev) => [
         `[${currentLecture?.title}]: ${noteText.trim()}`,
+
         ...prev,
-      ]);
-      setNoteText("");
+      ])
+
+      setNoteText("")
     }
-  };
+  }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0e1020] text-white overflow-hidden">
+    <div
+      className={`${
+        embedded
+          ? "h-[min(900px,calc(100vh-9rem))] min-h-[680px] rounded-[26px]"
+          : "h-screen"
+      } flex flex-col overflow-hidden bg-[#0e1020] text-white`}
+    >
       {/* Top bar */}
       <div className="shrink-0 h-14 bg-[#1B1F3B] border-b border-white/10 flex items-center px-4 gap-4 z-20">
-        <Link
-          to={`/courses/${course.id}`}
-          className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span className="text-xs hidden sm:block">Back to course</span>
-        </Link>
+        {embedded ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center gap-2 text-white/70 transition-colors hover:text-white"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="hidden text-xs sm:block">Back to my courses</span>
+          </button>
+        ) : (
+          <Link
+            to={`/courses/${course.id}`}
+            className="flex items-center gap-2 text-white/70 transition-colors hover:text-white"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="text-xs hidden sm:block">Back to course</span>
+          </Link>
+        )}
 
         <div className="w-px h-5 bg-white/20" />
 
@@ -322,19 +386,25 @@ export default function CourseLessons() {
                     {[
                       {
                         label: "Duration",
+
                         value: currentLecture?.duration || "—",
                       },
+
                       {
                         label: "Type",
+
                         value:
                           currentLecture?.type === "quiz"
                             ? "📝 Quiz"
                             : "🎥 Video",
                       },
+
                       {
                         label: "Section",
+
                         value: course.sections[activeSection]?.title,
                       },
+
                       { label: "Progress", value: `${progress}%` },
                     ].map((stat) => (
                       <div
@@ -403,12 +473,17 @@ export default function CourseLessons() {
                   {[
                     {
                       q: "How do I set up the development environment on Windows?",
+
                       a: "Great question! Check the pinned resource in Section 1 — there's a Windows setup guide included.",
+
                       votes: 24,
                     },
+
                     {
                       q: "What's the difference between useState and useReducer?",
+
                       a: "useState is best for simple, independent values. useReducer shines when state transitions depend on the previous state or involve multiple sub-values.",
+
                       votes: 18,
                     },
                   ].map((qa, i) => (
@@ -437,22 +512,33 @@ export default function CourseLessons() {
                   {[
                     {
                       name: "Course source code (GitHub)",
+
                       icon: "💾",
+
                       size: "Repository",
                     },
+
                     {
                       name: "Section slides (PDF)",
+
                       icon: "📑",
+
                       size: "4.2 MB",
                     },
+
                     {
                       name: "Cheat sheet — Key concepts",
+
                       icon: "📋",
+
                       size: "1.1 MB",
                     },
+
                     {
                       name: "Recommended reading list",
+
                       icon: "📚",
+
                       size: "Document",
                     },
                   ].map((r) => (
@@ -507,7 +593,9 @@ export default function CourseLessons() {
                 <div key={si}>
                   <button
                     onClick={() => setActiveSection(si)}
-                    className={`w-full text-left px-4 py-3 flex items-center justify-between hover:bg-white/5 transition-colors ${activeSection === si ? "bg-white/5" : ""}`}
+                    className={`w-full text-left px-4 py-3 flex items-center justify-between hover:bg-white/5 transition-colors ${
+                      activeSection === si ? "bg-white/5" : ""
+                    }`}
                   >
                     <div>
                       <p className="text-xs font-bold text-white">
@@ -518,19 +606,25 @@ export default function CourseLessons() {
                           section.lectures.filter((l) => {
                             const gIdx =
                               course.sections
+
                                 .slice(0, si)
+
                                 .reduce(
                                   (s, sec) => s + sec.lectures.length,
+
                                   0,
-                                ) + section.lectures.indexOf(l);
-                            return completedLectures.has(gIdx);
+                                ) + section.lectures.indexOf(l)
+
+                            return completedLectures.has(gIdx)
                           }).length
                         }
                         /{section.lectures.length} completed
                       </p>
                     </div>
                     <svg
-                      className={`w-3.5 h-3.5 text-white/40 transition-transform ${activeSection === si ? "rotate-180" : ""}`}
+                      className={`w-3.5 h-3.5 text-white/40 transition-transform ${
+                        activeSection === si ? "rotate-180" : ""
+                      }`}
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -547,18 +641,23 @@ export default function CourseLessons() {
                       {section.lectures.map((lecture, li) => {
                         const gIdx =
                           course.sections
+
                             .slice(0, si)
-                            .reduce((s, sec) => s + sec.lectures.length, 0) +
-                          li;
-                        const done = completedLectures.has(gIdx);
+
+                            .reduce((s, sec) => s + sec.lectures.length, 0) + li
+
+                        const done = completedLectures.has(gIdx)
+
                         const active =
-                          si === activeSection && li === activeLecture;
+                          si === activeSection && li === activeLecture
+
                         return (
                           <button
                             key={lecture.id}
                             onClick={() => {
-                              setActiveSection(si);
-                              setActiveLecture(li);
+                              setActiveSection(si)
+
+                              setActiveLecture(li)
                             }}
                             className={`w-full text-left px-4 py-3 flex items-start gap-3 border-l-2 transition-all ${
                               active
@@ -590,7 +689,13 @@ export default function CourseLessons() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p
-                                className={`text-xs leading-snug ${active ? "text-[#F5A623] font-semibold" : done ? "text-white/40" : "text-white/80"}`}
+                                className={`text-xs leading-snug ${
+                                  active
+                                    ? "text-[#F5A623] font-semibold"
+                                    : done
+                                      ? "text-white/40"
+                                      : "text-white/80"
+                                }`}
                               >
                                 {lecture.title}
                               </p>
@@ -615,7 +720,7 @@ export default function CourseLessons() {
                               </div>
                             </div>
                           </button>
-                        );
+                        )
                       })}
                     </div>
                   )}
@@ -626,5 +731,5 @@ export default function CourseLessons() {
         )}
       </div>
     </div>
-  );
+  )
 }

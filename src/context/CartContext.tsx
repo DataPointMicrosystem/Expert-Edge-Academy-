@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import type { Course } from "../data/courses";
 
-interface CartItem extends Course {
+type CartItem = Course & {
   quantity: number;
-}
+};
 
 interface CartContextType {
   items: CartItem[];
@@ -24,7 +24,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) =>
       prev.find((i) => i.id === course.id)
         ? prev
-        : [...prev, { ...course, quantity: 1 }]
+        : [...prev, { ...course, quantity: 1 }],
     );
   };
 
