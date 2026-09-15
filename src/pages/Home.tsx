@@ -1,34 +1,57 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
-import { COURSES, CATEGORIES, COMPANIES, TESTIMONIALS } from "../data/courses";
+import { CATEGORIES, COMPANIES, TESTIMONIALS } from "../data/courses";
+import type { Course } from "../data/courses";
 import CourseCard from "../components/CourseCard";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { EssentialSkillsCarousel } from "@/components/EssentialSkillsCarousel";
+import { getCourses } from "../lib/coursesApi";
+import { notify } from "../lib/notify";
 
 export default function Home() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") ?? "";
   const categoryParam = searchParams.get("category");
   const [selectedCat, setSelectedCat] = useState(categoryParam ?? "All");
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setSelectedCat(categoryParam ?? "All");
   }, [categoryParam]);
 
-  const filtered = COURSES.filter((c) => {
-    const matchQ =
-      !query ||
-      c.title.toLowerCase().includes(query.toLowerCase()) ||
-      c.instructor.toLowerCase().includes(query.toLowerCase());
-    const matchCat = selectedCat === "All" || c.category === selectedCat;
-    return matchQ && matchCat;
-  });
-  const trendingCourses = [...COURSES]
-    .sort(
-      (firstCourse, secondCourse) =>
-        secondCourse.enrolled - firstCourse.enrolled,
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError("");
+    getCourses(
+      `?${new URLSearchParams({ ...(query ? { search: query } : {}), limit: "12" })}`,
     )
-    .slice(0, 4);
+      .then((nextCourses) => active && setCourses(nextCourses))
+      .catch((requestError) => {
+        if (!active) return;
+        const message =
+          requestError instanceof Error &&
+          requestError.message.includes("temporarily unavailable")
+            ? "The course catalog is temporarily unavailable. Please try again in a moment."
+            : requestError instanceof Error
+              ? requestError.message
+              : "Unable to load courses.";
+        setError(message);
+        notify(message, "error");
+      })
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [query]);
+
+  const filtered =
+    selectedCat === "All"
+      ? courses
+      : courses.filter((course) => course.category === selectedCat);
+  const trendingCourses = courses.slice(0, 4);
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -112,9 +135,6 @@ export default function Home() {
                 }`}
               >
                 {category.name}
-                <span className="ml-1 text-xs text-[#9aa3b1]">
-                  ({category.count.toLocaleString()})
-                </span>
               </button>
             ))}
           </div>
@@ -140,7 +160,7 @@ export default function Home() {
               All courses <span className="text-[#f7b955]">₦15,000</span>
             </h2>
             <p className="max-w-sm text-sm text-white/75">
-              Sale ends Sunday. Over 68,000 courses to choose from.
+              New courses will appear here as soon as they are published.
             </p>
           </div>
           <div className="relative z-10 flex w-full flex-col items-center gap-3 md:w-auto">
@@ -194,7 +214,13 @@ export default function Home() {
           )}
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="py-20 text-center text-gray-500">
+            Loading courses...
+          </div>
+        ) : error ? (
+          <div className="py-20 text-center text-red-500">{error}</div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
             <div className="text-5xl mb-4">🔍</div>
             <p className="text-lg font-semibold text-gray-600">
@@ -220,9 +246,11 @@ export default function Home() {
         )}
 
         <div className="mt-10 text-center">
-          <button className="rounded-full border-2 border-[#154c8c] px-8 py-3.5 text-sm font-bold text-[#154c8c] transition-all hover:bg-[#0b1735] hover:text-white">
-            View all 68,000+ courses
-          </button>
+          {filtered.length > 0 && (
+            <button className="rounded-full border-2 border-[#154c8c] px-8 py-3.5 text-sm font-bold text-[#154c8c] transition-all hover:bg-[#0b1735] hover:text-white">
+              View all available courses
+            </button>
+          )}
         </div>
       </section>
 
@@ -298,15 +326,26 @@ export default function Home() {
             View all courses →
           </a>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {trendingCourses.map((course, index) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              popoverSide={index % 4 === 3 ? "left" : "right"}
-            />
-          ))}
-        </div>
+        {trendingCourses.length === 0 ? (
+          <div className="border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+            <h3 className="text-lg font-bold text-[#17213D]">
+              No trending courses yet
+            </h3>
+            <p className="mt-2 text-sm text-slate-500">
+              Check back soon. Published courses will appear in this section.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {trendingCourses.map((course, index) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                popoverSide={index % 4 === 3 ? "left" : "right"}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* How it works */}
@@ -334,7 +373,7 @@ export default function Home() {
                 step: "01",
                 icon: "🔍",
                 title: "Find your course",
-                desc: "Browse 68K+ expert-led courses. Filter by level, duration, language, or rating to find your perfect match.",
+                desc: "Browse published expert-led courses and find the right next skill for your goals.",
               },
               {
                 step: "02",

@@ -13,6 +13,8 @@ import Checkout from "../pages/Checkout";
 import Dashboard from "../pages/Dashboard";
 import FacilitatorDashboard from "../pages/FacilitatorDashboard";
 import TeachOnExpertEdge from "../pages/TeachOnExpertEdge";
+import PaymentCallback from "../pages/PaymentCallback";
+import AdminDashboard from "../pages/AdminDashboard";
 
 export const router = createBrowserRouter([
   {
@@ -43,6 +45,10 @@ export const router = createBrowserRouter([
         path: "teach",
         element: <TeachOnExpertEdge />,
       },
+      {
+        path: "payment/callback",
+        element: <PaymentCallback />,
+      },
     ],
   },
   {
@@ -72,5 +78,9 @@ export const router = createBrowserRouter([
   {
     path: "/facilitator",
     element: <FacilitatorDashboard />,
+  },
+  {
+    path: "/admin",
+    element: <AdminDashboard />,
   },
 ]);

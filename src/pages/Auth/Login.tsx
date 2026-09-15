@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
+import { notify } from "../../lib/notify";
 import expertedgeLogo from "../../asset/expertedgeLogo.jpg";
 
 export default function Login() {
@@ -26,21 +27,17 @@ export default function Login() {
     return e;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) {
       setErrors(errs);
+      notify(Object.values(errs)[0], "error");
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const signedInUser = login(
-        form.email,
-        form.email.split("@")[0],
-        undefined,
-        form.password,
-      );
+    try {
+      const signedInUser = await login(form.email, form.password);
       navigate(
         redirectTo !== "/"
           ? redirectTo
@@ -48,7 +45,14 @@ export default function Login() {
             ? "/facilitator"
             : "/dashboard",
       );
-    }, 1000);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to sign in.";
+      setErrors({ password: message });
+      notify(message, "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,7 +96,11 @@ export default function Login() {
                 title: "2.4M+ learners",
                 sub: "Across 190 countries",
               },
-              { icon: "🏆", title: "68,000+ courses", sub: "Updated monthly" },
+              {
+                icon: "🏆",
+                title: "Expert-led courses",
+                sub: "Updated regularly",
+              },
               {
                 icon: "💼",
                 title: "Certificate included",
@@ -188,9 +196,6 @@ export default function Login() {
                     : "border-neutral-300 focus:border-primary-blue bg-white"
                 }`}
               />
-              {errors.email && (
-                <p className="text-xs text-red-500 mt-1">{errors.email}</p>
-              )}
             </div>
 
             <div>
@@ -254,9 +259,6 @@ export default function Login() {
                   )}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
-              )}
             </div>
 
             <button

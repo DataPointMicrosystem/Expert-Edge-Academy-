@@ -1,20 +1,25 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react";
 
-import { Link, Navigate } from "react-router"
+import { Link, Navigate } from "react-router";
 
-import { COURSES } from "../data/courses"
+import { useAuth } from "../context/AuthContext";
+import { learningApi } from "../lib/learningApi";
+import { toCourse } from "../lib/coursesApi";
 
-import { useAuth } from "../context/AuthContext"
+import { formatNaira } from "../lib/money";
 
-import { formatNaira } from "../lib/money"
+import expertedgeLogo from "../asset/expertedgeLogo.jpg";
 
-import expertedgeLogo from "../asset/expertedgeLogo.jpg"
+type FacilitatorTab =
+  | "overview"
+  | "courses"
+  | "students"
+  | "analytics"
+  | "payouts";
 
-type FacilitatorTab = "overview" | "courses" | "students" | "analytics" | "payouts"
+type CourseStatus = "Published" | "Draft" | "In review";
 
-type CourseStatus = "Published" | "Draft" | "In review"
-
-const courseStatuses: CourseStatus[] = ["Published", "Draft", "In review"]
+const courseStatuses: CourseStatus[] = ["Published", "Draft", "In review"];
 
 const nigerianBanks = [
   "Access Bank",
@@ -48,33 +53,45 @@ const nigerianBanks = [
   "Unity Bank",
   "Wema Bank",
   "Zenith Bank",
-]
+];
 
 export default function FacilitatorDashboard() {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<FacilitatorTab>("overview")
+  const [activeTab, setActiveTab] = useState<FacilitatorTab>("overview");
 
-  const [courseFilter, setCourseFilter] = useState<"All" | CourseStatus>("All")
+  const [courseFilter, setCourseFilter] = useState<"All" | CourseStatus>("All");
 
-  const [createOpen, setCreateOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false);
 
-  const [accountOpen, setAccountOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false);
 
-  const [selectedLearnerCourse, setSelectedLearnerCourse] =
-    useState<string | null>(null)
+  const [selectedLearnerCourse, setSelectedLearnerCourse] = useState<
+    string | null
+  >(null);
 
-  const facilitatorCourses = COURSES.slice(0, 4).map((course, index) => ({
-    ...course,
+  const [facilitatorCourses, setFacilitatorCourses] = useState<any[]>([]);
 
-    status: courseStatuses[index % courseStatuses.length],
-
-    students: [1840, 982, 316, 74][index],
-
-    revenue: [4680000, 2415000, 785000, 0][index],
-
-    rating: [4.9, 4.8, 4.7, 0][index],
-  }))
+  useEffect(() => {
+    learningApi
+      .getInstructorCourses()
+      .then((response) =>
+        setFacilitatorCourses(
+          (response.data || []).map((course: any) => ({
+            ...toCourse(course),
+            status:
+              course.status === "PENDING_REVIEW"
+                ? "In review"
+                : course.status === "PUBLISHED"
+                  ? "Published"
+                  : "Draft",
+            students: course.enrollmentCount || course.studentsCount || 0,
+            revenue: course.revenue || 0,
+          })),
+        ),
+      )
+      .catch(() => setFacilitatorCourses([]));
+  }, []);
 
   const visibleCourses = useMemo(
     () =>
@@ -83,7 +100,7 @@ export default function FacilitatorDashboard() {
         : facilitatorCourses.filter((course) => course.status === courseFilter),
 
     [courseFilter],
-  )
+  );
 
   if (!user) {
     return (
@@ -91,14 +108,14 @@ export default function FacilitatorDashboard() {
         to={`/signup?role=instructor&redirectTo=${encodeURIComponent("/facilitator")}`}
         replace
       />
-    )
+    );
   }
 
   if (user.role !== "instructor") {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/dashboard" replace />;
   }
 
-  const tabs: { value: FacilitatorTab label: string }[] = [
+  const tabs: { value: FacilitatorTab; label: string }[] = [
     { value: "overview", label: "Overview" },
 
     { value: "courses", label: "Courses" },
@@ -108,7 +125,7 @@ export default function FacilitatorDashboard() {
     { value: "analytics", label: "Analytics" },
 
     { value: "payouts", label: "Payouts" },
-  ]
+  ];
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-slate-900">
@@ -242,17 +259,17 @@ export default function FacilitatorDashboard() {
 
       {createOpen && <CreateCourse onClose={() => setCreateOpen(false)} />}
     </main>
-  )
+  );
 }
 
 function Overview({
   courses,
   onOpenCourses,
 }: {
-  courses: ReturnType<typeof getCourseData>
-  onOpenCourses: () => void
+  courses: ReturnType<typeof getCourseData>;
+  onOpenCourses: () => void;
 }) {
-  const published = courses.filter((course) => course.status === "Published")
+  const published = courses.filter((course) => course.status === "Published");
 
   return (
     <div className="space-y-7">
@@ -354,7 +371,7 @@ function Overview({
         <CourseTable courses={courses.slice(0, 3)} />
       </div>
     </div>
-  )
+  );
 }
 
 function Courses({
@@ -363,10 +380,10 @@ function Courses({
   setFilter,
   onCreate,
 }: {
-  courses: ReturnType<typeof getCourseData>
-  filter: "All" | CourseStatus
-  setFilter: (filter: "All" | CourseStatus) => void
-  onCreate: () => void
+  courses: ReturnType<typeof getCourseData>;
+  filter: "All" | CourseStatus;
+  setFilter: (filter: "All" | CourseStatus) => void;
+  onCreate: () => void;
 }) {
   return (
     <div className="border border-slate-200 bg-white">
@@ -405,13 +422,13 @@ function Courses({
       </div>
       <CourseTable courses={courses} />
     </div>
-  )
+  );
 }
 
 function CourseTable({
   courses,
 }: {
-  courses: ReturnType<typeof getCourseData>
+  courses: ReturnType<typeof getCourseData>;
 }) {
   return (
     <div className="divide-y divide-slate-100">
@@ -464,27 +481,27 @@ function CourseTable({
         </article>
       ))}
     </div>
-  )
+  );
 }
 
 function Students({
   courses,
   onViewLearners,
 }: {
-  courses: ReturnType<typeof getCourseData>
-  onViewLearners: (courseId: string) => void
+  courses: ReturnType<typeof getCourseData>;
+  onViewLearners: (courseId: string) => void;
 }) {
-  const courseProgress = [78, 64, 51, 29]
+  const courseProgress = [78, 64, 51, 29];
 
   const totalStudents = courses.reduce(
     (total, course) => total + course.students,
     0,
-  )
+  );
 
   const averageProgress = Math.round(
     courseProgress.reduce((total, progress) => total + progress, 0) /
       courseProgress.length,
-  )
+  );
 
   const questions = [
     ["How do I submit the project?", "React Developer", "12 min ago"],
@@ -500,23 +517,23 @@ function Students({
       "Data Science & Machine Learning",
       "3 hrs ago",
     ],
-  ]
+  ];
 
-  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null)
+  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
 
-  const [reply, setReply] = useState("")
+  const [reply, setReply] = useState("");
 
-  const [replies, setReplies] = useState<Record<string, string>>({})
+  const [replies, setReplies] = useState<Record<string, string>>({});
 
   const sendReply = (question: string) => {
-    if (!reply.trim()) return
+    if (!reply.trim()) return;
 
-    setReplies((current) => ({ ...current, [question]: reply.trim() }))
+    setReplies((current) => ({ ...current, [question]: reply.trim() }));
 
-    setReply("")
+    setReply("");
 
-    setSelectedQuestion(null)
-  }
+    setSelectedQuestion(null);
+  };
 
   return (
     <div className="space-y-7">
@@ -560,15 +577,15 @@ function Students({
         </div>
         <div className="divide-y divide-slate-100">
           {courses.map((course, index) => {
-            const progress = courseProgress[index]
+            const progress = courseProgress[index];
 
             const activeLearners = Math.round(
               course.students * (0.42 + index * 0.04),
-            )
+            );
 
             const completedLearners = Math.round(
               (course.students * progress) / 100,
-            )
+            );
 
             return (
               <article
@@ -609,7 +626,7 @@ function Students({
                   View learners
                 </button>
               </article>
-            )
+            );
           })}
         </div>
       </div>
@@ -670,8 +687,8 @@ function Students({
                   onClick={() => {
                     setSelectedQuestion(
                       selectedQuestion === question ? null : question,
-                    )
-                    setReply("")
+                    );
+                    setReply("");
                   }}
                   className="block w-full text-left"
                 >
@@ -731,15 +748,15 @@ function Students({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function LearnerProgressDetail({
   course,
   onBack,
 }: {
-  course: ReturnType<typeof getCourseData>[number]
-  onBack: () => void
+  course: ReturnType<typeof getCourseData>[number];
+  onBack: () => void;
 }) {
   const learners = [
     ["Ada N.", "ada@example.com", "92%", "Active"],
@@ -751,7 +768,7 @@ function LearnerProgressDetail({
     ["David A.", "david@example.com", "34%", "Needs attention"],
 
     ["Grace I.", "grace@example.com", "12%", "Started recently"],
-  ]
+  ];
 
   return (
     <div className="border border-slate-200 bg-white">
@@ -833,7 +850,7 @@ function LearnerProgressDetail({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 function Analytics() {
@@ -878,64 +895,69 @@ function Analytics() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function Payouts() {
-  const availableBalance = 684000
+  const availableBalance = 684000;
 
-  const [withdrawOpen, setWithdrawOpen] = useState(false)
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
-  const [amount, setAmount] = useState("")
+  const [amount, setAmount] = useState("");
 
-  const [method, setMethod] = useState("Bank transfer")
+  const [method, setMethod] = useState("Bank transfer");
 
-  const [bankName, setBankName] = useState("")
+  const [bankName, setBankName] = useState("");
 
-  const [accountName, setAccountName] = useState("")
+  const [accountName, setAccountName] = useState("");
 
-  const [accountNumber, setAccountNumber] = useState("")
+  const [accountNumber, setAccountNumber] = useState("");
 
-  const [walletDetails, setWalletDetails] = useState("")
+  const [walletDetails, setWalletDetails] = useState("");
 
-  const [withdrawalError, setWithdrawalError] = useState("")
+  const [withdrawalError, setWithdrawalError] = useState("");
 
-  const [withdrawalSubmitted, setWithdrawalSubmitted] = useState(false)
+  const [withdrawalSubmitted, setWithdrawalSubmitted] = useState(false);
 
   const submitWithdrawal = (event: React.FormEvent) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    const requestedAmount = Number(amount)
+    const requestedAmount = Number(amount);
 
     if (!requestedAmount || requestedAmount < 5000) {
-      setWithdrawalError("Enter an amount of at least ₦5,000.")
+      setWithdrawalError("Enter an amount of at least ₦5,000.");
 
-      return
+      return;
     }
 
     if (requestedAmount > availableBalance) {
       setWithdrawalError(
         "The requested amount is higher than your available balance.",
-      )
+      );
 
-      return
+      return;
     }
 
-    if (method === "Bank transfer" && (!bankName || !accountName.trim() || !/^\d{10}$/.test(accountNumber))) {
-      setWithdrawalError("Select your bank and enter a valid 10-digit account number and account name.")
-      return
+    if (
+      method === "Bank transfer" &&
+      (!bankName || !accountName.trim() || !/^\d{10}$/.test(accountNumber))
+    ) {
+      setWithdrawalError(
+        "Select your bank and enter a valid 10-digit account number and account name.",
+      );
+      return;
     }
 
     if (method === "USDT wallet" && !walletDetails.trim()) {
-      setWithdrawalError("Add your USDT wallet address for this payout.")
+      setWithdrawalError("Add your USDT wallet address for this payout.");
 
-      return
+      return;
     }
 
-    setWithdrawalError("")
+    setWithdrawalError("");
 
-    setWithdrawalSubmitted(true)
-  }
+    setWithdrawalSubmitted(true);
+  };
 
   return (
     <div className="space-y-7">
@@ -972,9 +994,9 @@ function Payouts() {
           <button
             type="button"
             onClick={() => {
-              setWithdrawOpen(true)
-              setWithdrawalError("")
-              setWithdrawalSubmitted(false)
+              setWithdrawOpen(true);
+              setWithdrawalError("");
+              setWithdrawalSubmitted(false);
             }}
             className="self-start bg-primary-blue px-4 py-2.5 text-sm font-bold text-white hover:bg-[#0b1735]"
           >
@@ -1115,7 +1137,9 @@ function Payouts() {
                         >
                           <option value="">Select your bank</option>
                           {nigerianBanks.map((bank) => (
-                            <option key={bank} value={bank}>{bank}</option>
+                            <option key={bank} value={bank}>
+                              {bank}
+                            </option>
                           ))}
                         </select>
                       </label>
@@ -1124,7 +1148,9 @@ function Payouts() {
                         <input
                           required
                           value={accountName}
-                          onChange={(event) => setAccountName(event.target.value)}
+                          onChange={(event) =>
+                            setAccountName(event.target.value)
+                          }
                           className="mt-2 w-full border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
                           placeholder="Name on your bank account"
                         />
@@ -1136,7 +1162,13 @@ function Payouts() {
                           inputMode="numeric"
                           maxLength={10}
                           value={accountNumber}
-                          onChange={(event) => setAccountNumber(event.target.value.replace(/\D/g, "").slice(0, 10))}
+                          onChange={(event) =>
+                            setAccountNumber(
+                              event.target.value
+                                .replace(/\D/g, "")
+                                .slice(0, 10),
+                            )
+                          }
                           className="mt-2 w-full border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
                           placeholder="10-digit account number"
                         />
@@ -1148,7 +1180,9 @@ function Payouts() {
                       <input
                         required
                         value={walletDetails}
-                        onChange={(event) => setWalletDetails(event.target.value)}
+                        onChange={(event) =>
+                          setWalletDetails(event.target.value)
+                        }
                         className="mt-2 w-full border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
                         placeholder="Enter your USDT wallet address"
                       />
@@ -1181,7 +1215,7 @@ function Payouts() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function Metric({
@@ -1190,10 +1224,10 @@ function Metric({
   detail,
   positive = false,
 }: {
-  label: string
-  value: string
-  detail: string
-  positive?: boolean
+  label: string;
+  value: string;
+  detail: string;
+  positive?: boolean;
 }) {
   return (
     <div className="border border-slate-200 bg-white p-5">
@@ -1209,7 +1243,7 @@ function Metric({
         {detail}
       </p>
     </div>
-  )
+  );
 }
 
 function Bar({
@@ -1218,10 +1252,10 @@ function Bar({
   amount,
   active = false,
 }: {
-  label: string
-  value: string
-  amount: string
-  active?: boolean
+  label: string;
+  value: string;
+  amount: string;
+  active?: boolean;
 }) {
   return (
     <div className="group flex h-full flex-1 flex-col items-center justify-end gap-2">
@@ -1236,7 +1270,7 @@ function Bar({
       />
       <span className="text-[10px] text-slate-500">{label}</span>
     </div>
-  )
+  );
 }
 
 function StatusRow({
@@ -1244,9 +1278,9 @@ function StatusRow({
   value,
   color,
 }: {
-  label: string
-  value: string
-  color: string
+  label: string;
+  value: string;
+  color: string;
 }) {
   return (
     <div className="flex items-center justify-between">
@@ -1256,51 +1290,72 @@ function StatusRow({
       </div>
       <span className="text-sm text-slate-500">{value}</span>
     </div>
-  )
+  );
 }
 
 function CreateCourse({ onClose }: { onClose: () => void }) {
-  const [title, setTitle] = useState("")
+  const [title, setTitle] = useState("");
 
-  const [category, setCategory] = useState("Development")
+  const [category, setCategory] = useState("Development");
 
-  const [description, setDescription] = useState("")
+  const [description, setDescription] = useState("");
 
-  const [price, setPrice] = useState("")
+  const [price, setPrice] = useState("");
 
-  const [cover, setCover] = useState<File | null>(null)
+  const [cover, setCover] = useState<File | null>(null);
 
   const [lessons, setLessons] = useState([
     { title: "", video: null as File | null, materials: [] as File[] },
-  ])
+  ]);
 
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
   const updateLesson = (
     index: number,
-    update: Partial<typeof lessons[number]>,
+    update: Partial<(typeof lessons)[number]>,
   ) => {
     setLessons((current) =>
       current.map((lesson, lessonIndex) =>
         lessonIndex === index ? { ...lesson, ...update } : lesson,
       ),
-    )
-  }
+    );
+  };
 
   const addLesson = () => {
     setLessons((current) => [
       ...current,
       { title: "", video: null, materials: [] },
-    ])
-  }
+    ]);
+  };
 
-  const createDraft = (event: React.FormEvent) => {
-    event.preventDefault()
+  const createDraft = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-    if (!title.trim()) return
-
-    setSaved(true)
-  }
+    if (!title.trim()) return;
+    try {
+      await learningApi.createCourse({
+        title,
+        shortDescription: description,
+        description,
+        category,
+        level: "Beginner",
+        language: "English",
+        price: Number(price || 0),
+        originalPrice: Number(price || 0),
+        learningOutcomes: [],
+        requirements: [],
+        prerequisites: [],
+      });
+      setSaved(true);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to create the course draft.",
+      );
+    }
+  };
 
   if (saved) {
     return (
@@ -1326,7 +1381,7 @@ function CreateCourse({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -1335,6 +1390,7 @@ function CreateCourse({ onClose }: { onClose: () => void }) {
         onSubmit={createDraft}
         className="mx-auto my-6 w-full max-w-3xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8"
       >
+        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
         <div className="flex items-start justify-between gap-5">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary-blue">
@@ -1505,21 +1561,11 @@ function CreateCourse({ onClose }: { onClose: () => void }) {
         </div>
       </form>
     </div>
-  )
+  );
 }
 
-type CourseData = ReturnType<typeof getCourseData>
+type CourseData = ReturnType<typeof getCourseData>;
 
 function getCourseData() {
-  return COURSES.slice(0, 4).map((course, index) => ({
-    ...course,
-
-    status: courseStatuses[index % courseStatuses.length],
-
-    students: [1840, 982, 316, 74][index],
-
-    revenue: [4680000, 2415000, 785000, 0][index],
-
-    rating: [4.9, 4.8, 4.7, 0][index],
-  }))
+  return [] as any[];
 }
