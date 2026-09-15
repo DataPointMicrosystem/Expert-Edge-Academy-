@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { CATEGORIES, COURSES } from "../data/courses";
 
 const FEATURED_CATEGORIES = [
   "Development",
@@ -63,14 +62,6 @@ export default function ExploreDropdown() {
 
             <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-5">
               {FEATURED_CATEGORIES.map((categoryName) => {
-                const category = CATEGORIES.find(
-                  ({ name }) => name === categoryName,
-                );
-                const categoryCourses = COURSES.filter(
-                  ({ category: courseCategory }) =>
-                    courseCategory === categoryName,
-                ).slice(0, 2);
-
                 return (
                   <div key={categoryName} className="min-w-0">
                     <Link
@@ -81,23 +72,11 @@ export default function ExploreDropdown() {
                       {categoryName === "Data Science"
                         ? "Data & AI"
                         : categoryName}
-                      <span className="ml-1 text-[11px] font-normal text-neutral-500">
-                        ({category?.count.toLocaleString()})
-                      </span>
                     </Link>
 
-                    <div className="space-y-1">
-                      {categoryCourses.map((course) => (
-                        <Link
-                          key={course.id}
-                          to={`/courses/${course.id}`}
-                          className="block rounded-md py-1.5 text-xs leading-snug text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-primary-blue"
-                          onClick={() => setOpen(false)}
-                        >
-                          {course.title}
-                        </Link>
-                      ))}
-                    </div>
+                    <p className="py-1.5 text-xs leading-snug text-neutral-500">
+                      Browse published {categoryName.toLowerCase()} courses.
+                    </p>
                   </div>
                 );
               })}

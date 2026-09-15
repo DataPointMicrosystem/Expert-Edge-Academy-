@@ -3,11 +3,18 @@ import { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { formatNaira } from "../lib/money";
+import { apiRequest } from "../lib/api";
+import { notify } from "../lib/notify";
+import {
+  getReferralSessionId,
+  getStoredReferralCode,
+} from "../lib/referralsApi";
 
 export default function Checkout() {
-  const { items, total, clearCart } = useCart();
-  const { user, enroll } = useAuth();
-  const [submitted, setSubmitted] = useState(false);
+  const { items, total } = useCart();
+  const { user } = useAuth();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   if (!user) {
     return (
@@ -39,31 +46,6 @@ export default function Checkout() {
     );
   }
 
-  if (submitted) {
-    return (
-      <main className="min-h-[70vh] bg-slate-50 px-4 py-16 sm:px-6">
-        <section className="mx-auto max-w-xl rounded-2xl border border-emerald-200 bg-white px-6 py-14 text-center shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-            ✓
-          </div>
-          <h1 className="mt-5 text-2xl font-bold text-[#0b1735]">
-            Enrollment confirmed
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Your courses are ready, {user.name}. This demo checkout does not
-            process a real payment.
-          </p>
-          <Link
-            to="/"
-            className="mt-6 inline-flex rounded-xl bg-primary-blue px-5 py-3 text-sm font-semibold text-white"
-          >
-            Return home
-          </Link>
-        </section>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-[70vh] bg-slate-50 px-4 py-12 sm:px-6 lg:py-16">
       <div className="mx-auto max-w-6xl">
@@ -81,19 +63,37 @@ export default function Checkout() {
 
         <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
           <form
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
-              enroll(
-                items.map((item) => item.id),
-                items.map((item) => ({
-                  courseId: item.id,
-                  title: item.title,
-                  amount: item.price,
-                  purchasedAt: new Date().toISOString(),
-                })),
-              );
-              clearCart();
-              setSubmitted(true);
+              setLoading(true);
+              setError("");
+              try {
+                const response = await apiRequest<{
+                  data: { authorizationUrl: string };
+                }>("/payments/initialize", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    courseId: items[0].id,
+                    ...(getStoredReferralCode()
+                      ? {
+                          referralCode: getStoredReferralCode(),
+                          referralSessionId: getReferralSessionId(),
+                        }
+                      : {}),
+                    callbackUrl: `${window.location.origin}/payment/callback?courseId=${encodeURIComponent(items[0].id)}`,
+                  }),
+                });
+                window.location.assign(response.data.authorizationUrl);
+              } catch (requestError) {
+                const message =
+                  requestError instanceof Error
+                    ? requestError.message
+                    : "Unable to initialize payment.";
+                notify(message, "error");
+                setError(message);
+              } finally {
+                setLoading(false);
+              }
             }}
             className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
           >
@@ -139,11 +139,15 @@ export default function Checkout() {
                 />
               </label>
             </div>
+            {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
             <button
               type="submit"
+              disabled={loading}
               className="mt-8 w-full rounded-xl bg-primary-blue px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#0b1735]"
             >
-              Pay {formatNaira(total)}
+              {loading
+                ? "Starting secure payment..."
+                : `Pay ${formatNaira(total)}`}
             </button>
           </form>
 
@@ -153,7 +157,11 @@ export default function Checkout() {
               {items.map((item) => (
                 <div key={item.id} className="flex gap-3 py-4 first:pt-0">
                   <img
-                    src={`https://images.unsplash.com/${item.image}?w=160&h=100&fit=crop&auto=format`}
+                    src={
+                      item.image.startsWith("http")
+                        ? item.image
+                        : `https://images.unsplash.com/${item.image}?w=160&h=100&fit=crop&auto=format`
+                    }
                     alt=""
                     className="h-14 w-20 rounded-lg object-cover"
                   />

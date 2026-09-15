@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { useAuth } from "../../context/AuthContext";
+import { notify } from "../../lib/notify";
+import { storeReferralCode } from "../../lib/referralsApi";
 import expertedgeLogo from "../../asset/expertedgeLogo.jpg";
 
 export default function Signup() {
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const requestedRole = new URLSearchParams(location.search).get("role");
@@ -17,6 +21,11 @@ export default function Signup() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
+
+  useEffect(() => {
+    const referral = new URLSearchParams(location.search).get("ref");
+    if (referral) storeReferralCode(referral);
+  }, [location.search]);
 
   const strengthScore = (() => {
     const p = form.password;
@@ -44,27 +53,37 @@ export default function Signup() {
     return e;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) {
       setErrors(errs);
+      notify(Object.values(errs)[0], "error");
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const otp = String(Math.floor(100000 + Math.random() * 900000));
+    try {
+      await signup(
+        form.name,
+        form.email,
+        form.password,
+        form.role as "learner" | "instructor",
+      );
       localStorage.setItem(
         "pendingEmailVerification",
-        JSON.stringify({
-          ...form,
-          otp,
-          redirectTo,
-          expiresAt: Date.now() + 10 * 60 * 1000,
-        }),
+        JSON.stringify({ ...form, redirectTo }),
       );
       navigate(`/verify-email?email=${encodeURIComponent(form.email)}`);
-    }, 1200);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to create your account.";
+      setErrors({ form: message });
+      notify(message, "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const field = (key: keyof typeof form) => ({
@@ -159,6 +178,9 @@ export default function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {errors.form && (
+              <p className="text-sm text-red-500">{errors.form}</p>
+            )}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                 Full name

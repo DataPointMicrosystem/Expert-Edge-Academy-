@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { apiRequest } from "../../lib/api";
+import { notify } from "../../lib/notify";
 import expertedgeLogo from "../../asset/expertedgeLogo.jpg";
 
 export default function ForgotPassword() {
@@ -7,7 +9,7 @@ export default function ForgotPassword() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email.trim()) {
@@ -21,7 +23,21 @@ export default function ForgotPassword() {
     }
 
     setError("");
-    setSubmitted(true);
+    try {
+      await apiRequest("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      setSubmitted(true);
+      notify("Password reset instructions sent.", "success");
+    } catch (requestError) {
+      const message =
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to send the reset code.";
+      setError(message);
+      notify(message, "error");
+    }
   };
 
   return (

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
+import { apiRequest } from "../../lib/api";
+import { notify } from "../../lib/notify";
 import expertedgeLogo from "../../asset/expertedgeLogo.jpg";
 
 interface PendingVerification {
@@ -8,9 +10,7 @@ interface PendingVerification {
   email: string;
   password: string;
   role: "learner" | "instructor";
-  otp: string;
   redirectTo: string;
-  expiresAt: number;
 }
 
 const readPendingVerification = () => {
@@ -34,55 +34,59 @@ export default function VerifyEmail() {
     "your email address";
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
-  const [resentCode, setResentCode] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleVerify = (event: React.FormEvent) => {
+  const handleVerify = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!pending) {
       setError("Your verification session has expired. Please sign up again.");
+      notify(
+        "Your verification session has expired. Please sign up again.",
+        "error",
+      );
       return;
     }
-    if (Date.now() > pending.expiresAt) {
-      setError("This code has expired. Request a new code below.");
-      return;
+    setLoading(true);
+    try {
+      await apiRequest("/auth/verify-email", {
+        method: "POST",
+        body: JSON.stringify({ email: pending.email, otp: code.trim() }),
+      });
+      const signedInUser = await login(pending.email, pending.password);
+      localStorage.removeItem("pendingEmailVerification");
+      navigate(
+        pending.redirectTo !== "/"
+          ? pending.redirectTo
+          : signedInUser.role === "instructor"
+            ? "/facilitator"
+            : "/dashboard",
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to verify your email.";
+      setError(message);
+      notify(message, "error");
+    } finally {
+      setLoading(false);
     }
-    if (code.trim() !== pending.otp) {
-      setError("That code is not correct. Check the email and try again.");
-      return;
-    }
-
-    const signedInUser = login(
-      pending.email,
-      pending.name,
-      pending.role,
-      pending.password,
-    );
-    localStorage.setItem(`emailVerified:${pending.email}`, "true");
-    localStorage.removeItem("pendingEmailVerification");
-    navigate(
-      pending.redirectTo !== "/"
-        ? pending.redirectTo
-        : signedInUser.role === "instructor"
-          ? "/facilitator"
-          : "/dashboard",
-    );
   };
 
-  const resendCode = () => {
+  const resendCode = async () => {
     if (!pending) return;
-    const nextOtp = String(Math.floor(100000 + Math.random() * 900000));
-    const nextPending = {
-      ...pending,
-      otp: nextOtp,
-      expiresAt: Date.now() + 10 * 60 * 1000,
-    };
-    localStorage.setItem(
-      "pendingEmailVerification",
-      JSON.stringify(nextPending),
-    );
-    setResentCode(nextOtp);
-    setError("");
+    try {
+      await apiRequest("/auth/resend-verification", {
+        method: "POST",
+        body: JSON.stringify({ email: pending.email }),
+      });
+      setError("A new verification code has been sent.");
+      notify("A new verification code has been sent.", "success");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to resend the code.";
+      setError(message);
+      notify(message, "error");
+    }
   };
 
   return (
@@ -103,16 +107,17 @@ export default function VerifyEmail() {
           Enter your verification code
         </h1>
         <p className="mt-2 text-sm leading-6 text-gray-500">
-          We sent a six-digit OTP to <span className="font-semibold text-charcoal">{email}</span>.
+          We sent a six-digit OTP to{" "}
+          <span className="font-semibold text-charcoal">{email}</span>.
         </p>
 
         <div className="mt-6 rounded-2xl border border-primary-blue/20 bg-primary-blue/5 p-4 text-sm text-charcoal">
           <p className="font-semibold">Demo email delivery</p>
           <p className="mt-1 text-gray-600">
-            Use this OTP to finish creating your account:
+            Enter the code from the email to finish creating your account.
           </p>
           <p className="mt-2 text-2xl font-black tracking-[0.3em] text-primary-blue">
-            {resentCode || pending?.otp || "------"}
+            ------
           </p>
         </div>
 
@@ -139,6 +144,7 @@ export default function VerifyEmail() {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full rounded-xl bg-primary-blue px-4 py-3.5 text-sm font-bold text-white transition-colors hover:bg-deep-blue"
           >
             Verify email and create account

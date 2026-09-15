@@ -1,17 +1,27 @@
-import { useState } from "react"
+import { useEffect, useState } from "react";
 
-import { Link, Navigate } from "react-router"
+import { Link, Navigate } from "react-router";
 
-import { COURSES } from "../data/courses"
+import { COURSES } from "../data/courses";
 
-import { useAuth } from "../context/AuthContext"
-import type { NotificationChannel } from "../context/AuthContext"
+import { useAuth } from "../context/AuthContext";
+import { useLearning } from "../context/useLearning";
+import { toCourse } from "../lib/coursesApi";
+import { notify } from "../lib/notify";
+import { learningApi } from "../lib/learningApi";
+import {
+  referralsApi,
+  type ReferralHistoryItem,
+  type ReferralSummary,
+} from "../lib/referralsApi";
+import type { Course } from "../data/courses";
+import type { NotificationChannel } from "../context/AuthContext";
 
-import { formatNaira } from "../lib/money"
+import { formatNaira } from "../lib/money";
 
-import CourseLessons from "./CourseLessons"
+import CourseLessons from "./CourseLessons";
 
-import expertedgeLogo from "../asset/expertedgeLogo.jpg"
+import expertedgeLogo from "../asset/expertedgeLogo.jpg";
 
 const testQuestions = [
   "Which habit best supports steady progress through an online course?",
@@ -19,7 +29,7 @@ const testQuestions = [
   "What should you do before submitting a course project?",
 
   "When should you take the final assessment?",
-]
+];
 
 const testAnswers = [
   "Practice consistently",
@@ -27,31 +37,34 @@ const testAnswers = [
   "Review and test your work",
 
   "After completing the lessons",
-]
+];
 
 const learnerNotifications = [
   {
     id: "course-progress",
     title: "Keep your learning moving",
-    message: "You are making great progress. Continue your course when you are ready.",
+    message:
+      "You are making great progress. Continue your course when you are ready.",
     time: "Today",
     type: "Learning",
   },
   {
     id: "certificate-ready",
     title: "Your certificate is waiting",
-    message: "Complete your final assessment to unlock your course certificate.",
+    message:
+      "Complete your final assessment to unlock your course certificate.",
     time: "Yesterday",
     type: "Achievement",
   },
   {
     id: "new-courses",
     title: "New courses are available",
-    message: "Explore the marketplace to discover your next learning opportunity.",
+    message:
+      "Explore the marketplace to discover your next learning opportunity.",
     time: "3 days ago",
     type: "Marketplace",
   },
-]
+];
 
 export default function Dashboard() {
   const {
@@ -59,58 +72,117 @@ export default function Dashboard() {
 
     logout,
 
-    purchases,
-
-    referralCode,
-    referralBalance,
-
     updateProfile,
+    changePassword,
     notificationChannel,
     setNotificationChannel,
 
     markCourseComplete,
 
     isCourseComplete,
-  } = useAuth()
+  } = useAuth();
 
-  const [activeTab, setActiveTab] =
-    useState<
-      "learning" | "history" | "referrals" | "notifications" | "settings"
-    >("learning")
+  const {
+    enrollments,
+    certificates,
+    notifications,
+    markNotification,
+    markAllNotifications,
+  } = useLearning();
 
-  const [lessonCourseId, setLessonCourseId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<
+    "learning" | "history" | "referrals" | "notifications" | "settings"
+  >("learning");
 
-  const [testCourseId, setTestCourseId] = useState<string | null>(null)
+  const [lessonCourseId, setLessonCourseId] = useState<string | null>(null);
 
-  const [answers, setAnswers] = useState<string[]>([])
+  const [testCourseId, setTestCourseId] = useState<string | null>(null);
 
-  const [testMessage, setTestMessage] = useState("")
+  const [answers, setAnswers] = useState<string[]>([]);
+
+  const [testMessage, setTestMessage] = useState("");
 
   const [profile, setProfile] = useState({
     name: user?.name || "",
 
     email: user?.email || "",
-  })
+  });
 
-  const [copied, setCopied] = useState("")
+  const [copied, setCopied] = useState("");
 
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
-  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const [settingsSection, setSettingsSection] = useState<
     "profile" | "notifications" | "password"
-  >("profile")
+  >("profile");
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  })
+  });
 
-  const [passwordError, setPasswordError] = useState("")
+  const [passwordError, setPasswordError] = useState("");
 
-  const [readNotifications, setReadNotifications] = useState<string[]>([])
+  const [readNotifications, setReadNotifications] = useState<string[]>([]);
+  const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [referralSummary, setReferralSummary] =
+    useState<ReferralSummary | null>(null);
+  const [referralHistory, setReferralHistory] = useState<ReferralHistoryItem[]>(
+    [],
+  );
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [referralError, setReferralError] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    setHistoryLoading(true);
+    learningApi
+      .getPaymentHistory()
+      .then((response) => setPaymentHistory(response.data || []))
+      .catch((error) =>
+        notify(
+          error instanceof Error
+            ? error.message
+            : "Purchase history is temporarily unavailable.",
+          "error",
+        ),
+      )
+      .finally(() => setHistoryLoading(false));
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) return;
+    setReferralLoading(true);
+    setReferralError("");
+    Promise.all([referralsApi.getSummary(), referralsApi.getHistory()])
+      .then(([summaryResponse, historyResponse]) => {
+        setReferralSummary(summaryResponse.data);
+        setReferralHistory(historyResponse.data || []);
+      })
+      .catch(async (error) => {
+        try {
+          await referralsApi.getCode();
+          setReferralSummary(null);
+          setReferralHistory([]);
+          setReferralError(
+            "Your referral code is ready, but referral metrics are temporarily unavailable.",
+          );
+        } catch (fallbackError) {
+          setReferralError(
+            fallbackError instanceof Error
+              ? fallbackError.message
+              : error instanceof Error
+                ? error.message
+                : "Referral data is temporarily unavailable.",
+          );
+        }
+      })
+      .finally(() => setReferralLoading(false));
+  }, [user?.id]);
 
   if (!user)
     return (
@@ -118,83 +190,96 @@ export default function Dashboard() {
         to={`/login?redirectTo=${encodeURIComponent("/dashboard")}`}
         replace
       />
-    )
+    );
 
   if (user.role === "instructor") {
-    return <Navigate to="/facilitator" replace />
+    return <Navigate to="/facilitator" replace />;
   }
 
-  const purchasedCourses = purchases
-
-    .map((purchase) =>
-      COURSES.find((course) => course.id === purchase.courseId),
-    )
-
-    .filter((course): course is typeof COURSES[number] => Boolean(course))
+  const purchasedCourses = enrollments
+    .map((enrollment) => enrollment.course && toCourse(enrollment.course))
+    .filter(Boolean);
 
   const copyReferralLink = async (courseId: string) => {
-    const link = `${window.location.origin}/courses/${courseId}?ref=${referralCode}`
+    const code = referralSummary?.referralCode;
+    if (!code) {
+      notify("Your referral code is not available yet.", "error");
+      return;
+    }
+    const link = `${window.location.origin}/signup?ref=${encodeURIComponent(code)}&courseId=${encodeURIComponent(courseId)}`;
 
-    await navigator.clipboard?.writeText(link)
+    await navigator.clipboard?.writeText(link);
+    notify("Referral link copied.", "success");
 
-    setCopied(courseId)
+    setCopied(courseId);
 
-    window.setTimeout(() => setCopied(""), 1800)
-  }
+    window.setTimeout(() => setCopied(""), 1800);
+  };
 
   const submitTest = (courseId: string) => {
     const score = answers.filter(
       (answer, index) => answer === testAnswers[index],
-    ).length
+    ).length;
 
     if (score >= 2) {
-      markCourseComplete(courseId)
+      markCourseComplete(courseId);
 
-      setTestMessage("Passed. Your certificate is now available below.")
+      setTestMessage("Passed. Your certificate is now available below.");
+      notify("Passed. Your certificate is now available below.", "success");
     } else {
       setTestMessage(
         `You scored ${score}/3. Review the lessons and try again.`,
-      )
+      );
+      notify(
+        `You scored ${score}/3. Review the lessons and try again.`,
+        "error",
+      );
     }
-  }
+  };
 
   const saveProfile = (event: React.FormEvent) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    updateProfile(profile)
+    updateProfile(profile);
 
-    setTestMessage("Profile settings saved.")
-  }
+    setTestMessage("Profile settings saved.");
+    notify("Profile settings saved.", "success");
+  };
 
   const savePassword = (event: React.FormEvent) => {
-    event.preventDefault()
-    setPasswordError("")
+    event.preventDefault();
+    setPasswordError("");
 
     if (!passwordForm.currentPassword) {
-      setPasswordError("Enter your current password.")
-      return
+      setPasswordError("Enter your current password.");
+      return;
     }
     if (passwordForm.newPassword.length < 8) {
-      setPasswordError("Your new password must be at least 8 characters.")
-      return
+      setPasswordError("Your new password must be at least 8 characters.");
+      return;
     }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError("Your new passwords do not match.")
-      return
+      setPasswordError("Your new passwords do not match.");
+      return;
     }
 
     const error = changePassword(
       passwordForm.currentPassword,
       passwordForm.newPassword,
-    )
+    );
     if (error) {
-      setPasswordError(error)
-      return
+      setPasswordError(error);
+      return;
     }
 
-    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
-    setTestMessage("Password changed successfully.")
-  }
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setTestMessage("Password changed successfully.");
+    notify("Password changed successfully.", "success");
+  };
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-slate-900">
@@ -257,8 +342,8 @@ export default function Dashboard() {
                 </div>
                 <button
                   onClick={() => {
-                    setActiveTab("settings")
-                    setAccountMenuOpen(false)
+                    setActiveTab("settings");
+                    setAccountMenuOpen(false);
                   }}
                   className="mt-2 flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
@@ -272,8 +357,8 @@ export default function Dashboard() {
                 </Link>
                 <button
                   onClick={() => {
-                    setAccountMenuOpen(false)
-                    setLogoutDialogOpen(true)
+                    setAccountMenuOpen(false);
+                    setLogoutDialogOpen(true);
                   }}
                   className="mt-1 flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50"
                 >
@@ -299,19 +384,29 @@ export default function Dashboard() {
               </p>
             </div>
             <p className="text-sm text-slate-500">
-              Signed in as <span className="font-semibold text-slate-700">{user.email}</span>
+              Signed in as{" "}
+              <span className="font-semibold text-slate-700">{user.email}</span>
             </p>
           </div>
           <div className="mt-7 grid divide-y divide-slate-200 border-y border-slate-200 bg-white sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            <Stat label="Courses purchased" value={String(purchases.length)} />
+            <Stat
+              label="Courses purchased"
+              value={String(enrollments.length)}
+            />
             <Stat
               label="Certificates earned"
-              value={String(
-                purchasedCourses.filter((course) => isCourseComplete(course.id))
-                  .length,
-              )}
+              value={String(certificates.length)}
             />
-            <Stat label="Referral balance" value={formatNaira(referralBalance)} />
+            <Stat
+              label="Referral balance"
+              value={
+                referralLoading
+                  ? "Loading..."
+                  : referralSummary
+                    ? formatNaira(referralSummary.balance)
+                    : "Unavailable"
+              }
+            />
           </div>
         </section>
 
@@ -331,7 +426,7 @@ export default function Dashboard() {
               <button
                 key={value}
                 onClick={() => {
-                  setActiveTab(value as typeof activeTab)
+                  setActiveTab(value as typeof activeTab);
                 }}
                 className={`whitespace-nowrap rounded-xl px-4 py-3 text-left text-sm font-bold transition ${
                   activeTab === value
@@ -378,7 +473,13 @@ export default function Dashboard() {
                 {!lessonCourseId && purchasedCourses.length > 0 && (
                   <div className="grid gap-5 md:grid-cols-2">
                     {purchasedCourses.map((course) => {
-                      const complete = isCourseComplete(course.id)
+                      const certificate = certificates.find(
+                        (item) =>
+                          (item.course?._id ||
+                            item.course?.id ||
+                            item.courseId) === course.id,
+                      );
+                      const complete = Boolean(certificate);
 
                       return (
                         <article
@@ -418,11 +519,11 @@ export default function Dashboard() {
                               </button>
                               <button
                                 onClick={() => {
-                                  setTestCourseId(course.id)
+                                  setTestCourseId(course.id);
 
-                                  setAnswers([])
+                                  setAnswers([]);
 
-                                  setTestMessage("")
+                                  setTestMessage("");
                                 }}
                                 className="border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 hover:text-[#17213D]"
                               >
@@ -431,18 +532,23 @@ export default function Dashboard() {
                                   : "Take final test"}
                               </button>
                             </div>
-                            {complete && (
-                              <a
-                                href={`data:text/plain;charset=utf-8,Certificate of completion%0A${encodeURIComponent(user.name)} completed ${encodeURIComponent(course.title)}`}
-                                download={`${course.id}-certificate.txt`}
-                                className="mt-4 inline-block text-sm font-bold text-emerald-700 hover:underline"
-                              >
-                                Download certificate
-                              </a>
-                            )}
+                            {complete &&
+                              (certificate?.url ||
+                                certificate?.downloadUrl) && (
+                                <a
+                                  href={
+                                    certificate.url || certificate.downloadUrl
+                                  }
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="mt-4 inline-block text-sm font-bold text-emerald-700 hover:underline"
+                                >
+                                  View certificate
+                                </a>
+                              )}
                           </div>
                         </article>
-                      )
+                      );
                     })}
                   </div>
                 )}
@@ -467,34 +573,58 @@ export default function Dashboard() {
                   Purchase history
                 </h2>
                 <div className="mt-6 divide-y divide-slate-200">
-                  {purchases.map((purchase) => (
-                    <div
-                      key={purchase.courseId}
-                      className="flex flex-col justify-between gap-2 py-4 sm:flex-row sm:items-center"
-                    >
-                      <div>
-                        <p className="font-bold text-[#17213D]">
-                          {purchase.title}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          Purchased{" "}
-                          {new Date(purchase.purchasedAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <p className="font-bold text-slate-700">
-                        {formatNaira(purchase.amount)}
-                      </p>
-                    </div>
-                  ))}
+                  {historyLoading ? (
+                    <p className="py-8 text-sm text-slate-500">
+                      Loading purchase history...
+                    </p>
+                  ) : paymentHistory.length === 0 ? (
+                    <p className="py-8 text-sm text-slate-500">
+                      No completed purchases yet. Verified payments will appear
+                      here.
+                    </p>
+                  ) : (
+                    paymentHistory.map((payment) => {
+                      const paymentCourse = payment.course || {};
+                      return (
+                        <div
+                          key={payment._id || payment.id || payment.reference}
+                          className="flex flex-col justify-between gap-2 py-4 sm:flex-row sm:items-center"
+                        >
+                          <div>
+                            <p className="font-bold text-[#17213D]">
+                              {paymentCourse.title ||
+                                payment.title ||
+                                "Course purchase"}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-500">
+                              {payment.status || "Payment"} ·{" "}
+                              {new Date(
+                                payment.createdAt ||
+                                  payment.paidAt ||
+                                  payment.purchasedAt,
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <p className="font-bold text-slate-700">
+                            {formatNaira(
+                              Number(payment.amount || payment.amountPaid || 0),
+                            )}
+                          </p>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             )}
 
             {activeTab === "referrals" && (
               <ReferralPanel
-                referralCode={referralCode}
-                referralBalance={referralBalance}
-                courses={COURSES}
+                summary={referralSummary}
+                history={referralHistory}
+                loading={referralLoading}
+                error={referralError}
+                courses={purchasedCourses as Course[]}
                 copied={copied}
                 onCopy={copyReferralLink}
               />
@@ -504,7 +634,9 @@ export default function Dashboard() {
               <div className="max-w-3xl border border-slate-200 bg-white">
                 <div className="flex flex-col justify-between gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center">
                   <div>
-                    <p className="text-sm font-semibold text-primary-blue">Your inbox</p>
+                    <p className="text-sm font-semibold text-primary-blue">
+                      Your inbox
+                    </p>
                     <h2 className="mt-1 text-2xl font-black text-[#17213D]">
                       Notifications
                     </h2>
@@ -512,12 +644,13 @@ export default function Dashboard() {
                       Stay up to date with your learning activity and account.
                     </p>
                   </div>
-                  {readNotifications.length < learnerNotifications.length && (
+                  {notifications.some(
+                    (notification) =>
+                      !notification.isRead && !notification.read,
+                  ) && (
                     <button
                       type="button"
-                      onClick={() =>
-                        setReadNotifications(learnerNotifications.map((notification) => notification.id))
-                      }
+                      onClick={() => void markAllNotifications()}
                       className="text-left text-sm font-bold text-primary-blue hover:underline sm:text-right"
                     >
                       Mark all as read
@@ -525,33 +658,43 @@ export default function Dashboard() {
                   )}
                 </div>
                 <div className="divide-y divide-slate-100">
-                  {learnerNotifications.map((notification) => {
-                    const isRead = readNotifications.includes(notification.id)
+                  {notifications.map((notification) => {
+                    const notificationId = notification._id || notification.id;
+                    const isRead = notification.isRead || notification.read;
 
                     return (
                       <button
                         key={notification.id}
                         type="button"
-                        onClick={() =>
-                          setReadNotifications((current) =>
-                            current.includes(notification.id)
-                              ? current
-                              : [...current, notification.id],
-                          )
-                        }
+                        onClick={() => void markNotification(notificationId)}
                         className={`flex w-full gap-4 p-5 text-left transition hover:bg-slate-50 ${isRead ? "" : "bg-blue-50/50"}`}
                       >
-                        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${isRead ? "bg-slate-200" : "bg-primary-blue"}`} />
+                        <span
+                          className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${isRead ? "bg-slate-200" : "bg-primary-blue"}`}
+                        />
                         <span className="min-w-0 flex-1">
                           <span className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-sm font-bold text-[#17213D]">{notification.title}</span>
-                            <span className="text-xs text-slate-400">{notification.time}</span>
+                            <span className="text-sm font-bold text-[#17213D]">
+                              {notification.title || notification.subject}
+                            </span>
+                            <span className="text-xs text-slate-400">
+                              {notification.time ||
+                                (notification.createdAt
+                                  ? new Date(
+                                      notification.createdAt,
+                                    ).toLocaleDateString()
+                                  : "")}
+                            </span>
                           </span>
-                          <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-primary-blue">{notification.type}</span>
-                          <span className="mt-2 block text-sm leading-6 text-slate-600">{notification.message}</span>
+                          <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-primary-blue">
+                            {notification.type}
+                          </span>
+                          <span className="mt-2 block text-sm leading-6 text-slate-600">
+                            {notification.message || notification.body}
+                          </span>
                         </span>
                       </button>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -575,9 +718,9 @@ export default function Dashboard() {
                       key={value}
                       type="button"
                       onClick={() => {
-                        setSettingsSection(value as typeof settingsSection)
-                        setTestMessage("")
-                        setPasswordError("")
+                        setSettingsSection(value as typeof settingsSection);
+                        setTestMessage("");
+                        setPasswordError("");
                       }}
                       className={`rounded-xl px-4 py-2.5 text-sm font-bold transition ${settingsSection === value ? "bg-[#17213D] text-white" : "text-slate-600 hover:bg-slate-50"}`}
                     >
@@ -616,14 +759,25 @@ export default function Dashboard() {
                 )}
 
                 {settingsSection === "notifications" && (
-                  <div className="mt-6" aria-labelledby="notification-settings-title">
-                    <h3 id="notification-settings-title" className="text-lg font-black text-[#17213D]">
+                  <div
+                    className="mt-6"
+                    aria-labelledby="notification-settings-title"
+                  >
+                    <h3
+                      id="notification-settings-title"
+                      className="text-lg font-black text-[#17213D]"
+                    >
                       Notification settings
                     </h3>
                     <p className="mt-1 text-sm text-slate-500">
-                      Choose where you want to receive account and learning updates.
+                      Choose where you want to receive account and learning
+                      updates.
                     </p>
-                    <div className="mt-5 grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Notification channel">
+                    <div
+                      className="mt-5 grid gap-3 sm:grid-cols-3"
+                      role="radiogroup"
+                      aria-label="Notification channel"
+                    >
                       {[
                         ["email", "Email", "Receive updates in your inbox."],
                         ["app", "App", "Receive alerts in the app."],
@@ -639,18 +793,24 @@ export default function Dashboard() {
                             value={value}
                             checked={notificationChannel === value}
                             onChange={() => {
-                              setNotificationChannel(value as NotificationChannel)
-                              setTestMessage("Notification preference saved.")
+                              setNotificationChannel(
+                                value as NotificationChannel,
+                              );
+                              setTestMessage("Notification preference saved.");
                             }}
                             className="sr-only"
                           />
                           <span className="flex items-center justify-between gap-2 text-sm font-bold text-[#17213D]">
                             {label}
                             {notificationChannel === value && (
-                              <span className="text-xs font-bold text-primary-blue">Selected</span>
+                              <span className="text-xs font-bold text-primary-blue">
+                                Selected
+                              </span>
                             )}
                           </span>
-                          <span className="mt-1 block text-xs leading-5 text-slate-500">{description}</span>
+                          <span className="mt-1 block text-xs leading-5 text-slate-500">
+                            {description}
+                          </span>
                         </label>
                       ))}
                     </div>
@@ -668,19 +828,35 @@ export default function Dashboard() {
                     <PasswordField
                       label="Current password"
                       value={passwordForm.currentPassword}
-                      onChange={(value) => setPasswordForm({ ...passwordForm, currentPassword: value })}
+                      onChange={(value) =>
+                        setPasswordForm({
+                          ...passwordForm,
+                          currentPassword: value,
+                        })
+                      }
                     />
                     <PasswordField
                       label="New password"
                       value={passwordForm.newPassword}
-                      onChange={(value) => setPasswordForm({ ...passwordForm, newPassword: value })}
+                      onChange={(value) =>
+                        setPasswordForm({ ...passwordForm, newPassword: value })
+                      }
                     />
                     <PasswordField
                       label="Confirm new password"
                       value={passwordForm.confirmPassword}
-                      onChange={(value) => setPasswordForm({ ...passwordForm, confirmPassword: value })}
+                      onChange={(value) =>
+                        setPasswordForm({
+                          ...passwordForm,
+                          confirmPassword: value,
+                        })
+                      }
                     />
-                    {passwordError && <p className="mt-3 text-sm font-semibold text-red-600">{passwordError}</p>}
+                    {passwordError && (
+                      <p className="mt-3 text-sm font-semibold text-red-600">
+                        {passwordError}
+                      </p>
+                    )}
                     <button className="mt-5 bg-primary-blue px-5 py-3 text-sm font-bold text-white hover:bg-[#0b1735]">
                       Update password
                     </button>
@@ -729,7 +905,7 @@ export default function Dashboard() {
         </div>
       )}
     </main>
-  )
+  );
 }
 
 function PasswordField({
@@ -737,9 +913,9 @@ function PasswordField({
   value,
   onChange,
 }: {
-  label: string
-  value: string
-  onChange: (value: string) => void
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   return (
     <label className="mt-4 block text-sm font-bold text-slate-700">
@@ -751,16 +927,18 @@ function PasswordField({
         className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
       />
     </label>
-  )
+  );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="p-4 sm:px-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-5 00">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-5 00">
+        {label}
+      </p>
       <p className="mt-2 text-xl font-black text-[#17213D]">{value}</p>
     </div>
-  )
+  );
 }
 
 function EmptyLearning() {
@@ -779,85 +957,172 @@ function EmptyLearning() {
         Explore courses
       </Link>
     </div>
-  )
+  );
 }
 
 function ReferralPanel({
-  referralCode,
-
-  referralBalance,
-
+  summary,
+  history,
+  loading,
+  error,
   courses,
 
   copied,
 
   onCopy,
 }: {
-  referralCode: string
+  summary: ReferralSummary | null;
+  history: ReferralHistoryItem[];
+  loading: boolean;
+  error: string;
+  courses: Course[];
 
-  referralBalance: number
+  copied: string;
 
-  courses: typeof COURSES
-
-  copied: string
-
-  onCopy: (courseId: string) => void
+  onCopy: (courseId: string) => void;
 }) {
   return (
     <div>
-      <h2 className="text-2xl font-black text-[#17213D]">
-        Referral & earnings
-      </h2>
-      <p className="mt-2 text-sm text-slate-500">
-        Share a course link and earn a bonus when a new learner purchases
-        through it.
-      </p>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div className="border border-[#17213D] bg-[#17213D] p-5 text-white">
-          <p className="text-xs text-white/60">Your referral code</p>
-          <p className="mt-2 text-2xl font-black tracking-widest text-[#F5A623]">
-            {referralCode}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-sm font-semibold text-primary-blue">
+            Invite and earn
           </p>
-          <p className="mt-4 text-sm text-white/70">
-            Available bonus:{" "}
-            <strong className="text-white">
-              {formatNaira(referralBalance)}
-            </strong>
+          <h2 className="mt-1 text-3xl font-black text-[#17213D]">
+            Referral center
+          </h2>
+          <p className="mt-2 max-w-xl text-sm text-slate-500">
+            Share your code, track referrals, and see rewards after verified
+            payments.
           </p>
         </div>
-        <div className="border border-emerald-200 bg-emerald-50 p-5">
-          <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-            How it works
-          </p>
-          <p className="mt-2 text-sm leading-6 text-emerald-950">
-            Copy any course link below. Each completed purchase credits your
-            demo bonus balance.
-          </p>
-        </div>
+        {summary?.referralCode && (
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-right">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Your code
+            </p>
+            <p className="font-black tracking-widest text-primary-blue">
+              {summary.referralCode}
+            </p>
+          </div>
+        )}
       </div>
-      <div className="mt-6 border border-slate-200 bg-white p-5">
-        <h3 className="font-bold text-[#17213D]">Promote a course</h3>
-        <div className="mt-3 divide-y divide-slate-100">
-          {courses.map((course) => (
-            <div
-              key={course.id}
-              className="flex flex-col justify-between gap-3 py-3 sm:flex-row sm:items-center"
-            >
-              <p className="text-sm font-semibold text-slate-700">
-                {course.title}
-              </p>
-              <button
-                onClick={() => onCopy(course.id)}
-                className="shrink-0 border border-primary-blue px-3 py-2 text-xs font-bold text-primary-blue hover:bg-primary-blue hover:text-white"
+
+      {loading ? (
+        <div className="mt-6 border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+          Loading referral data...
+        </div>
+      ) : error ? (
+        <div className="mt-6 border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+          {error}
+        </div>
+      ) : summary ? (
+        <>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              ["Available balance", summary.balance, "text-emerald-700"],
+              ["Total earned", summary.totalEarned, "text-[#17213D]"],
+              ["Pending", summary.pendingBalance, "text-amber-700"],
+            ].map(([label, amount, color]) => (
+              <div
+                key={String(label)}
+                className="border border-slate-200 bg-white p-5"
               >
-                {copied === course.id ? "Copied" : "Copy referral link"}
-              </button>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  {label}
+                </p>
+                <p className={`mt-2 text-2xl font-black ${color}`}>
+                  {formatNaira(Number(amount))}
+                </p>
+              </div>
+            ))}
+            <div className="border border-slate-200 bg-white p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Successful referrals
+              </p>
+              <p className="mt-2 text-2xl font-black text-[#17213D]">
+                {summary.successfulReferrals}
+              </p>
             </div>
-          ))}
+            <div className="border border-slate-200 bg-white p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Link clicks
+              </p>
+              <p className="mt-2 text-2xl font-black text-[#17213D]">
+                {summary.clicks}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <section className="border border-slate-200 bg-white p-5">
+              <h3 className="font-bold text-[#17213D]">Promote a course</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Create a signup link tied to one of your enrolled courses.
+              </p>
+              <div className="mt-3 divide-y divide-slate-100">
+                {courses.length === 0 ? (
+                  <p className="py-5 text-sm text-slate-500">
+                    Enroll in a course before promoting it.
+                  </p>
+                ) : (
+                  courses.map((course) => (
+                    <div
+                      key={course.id}
+                      className="flex items-center justify-between gap-3 py-3"
+                    >
+                      <p className="line-clamp-2 text-sm font-semibold text-slate-700">
+                        {course.title}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => onCopy(course.id)}
+                        className="shrink-0 rounded-lg bg-primary-blue px-3 py-2 text-xs font-bold text-white hover:bg-[#0b1735]"
+                      >
+                        {copied === course.id ? "Copied" : "Copy link"}
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+            <section className="border border-slate-200 bg-white p-5">
+              <h3 className="font-bold text-[#17213D]">Referral history</h3>
+              {history.length === 0 ? (
+                <p className="py-5 text-sm text-slate-500">
+                  No referral rewards yet. Completed verified referrals will
+                  appear here.
+                </p>
+              ) : (
+                <div className="mt-3 divide-y divide-slate-100">
+                  {history.map((item) => (
+                    <div key={item.id} className="py-3">
+                      <div className="flex justify-between gap-3">
+                        <p className="text-sm font-semibold text-slate-700">
+                          {item.course?.title || "Course referral"}
+                        </p>
+                        <span className="text-sm font-bold text-emerald-700">
+                          {formatNaira(item.amount)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {item.status} ·{" "}
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        </>
+      ) : (
+        <div className="mt-6 border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+          Referral data is not available yet.
         </div>
-      </div>
+      )}
     </div>
-  )
+  );
 }
 
 function TestPanel({
@@ -873,17 +1138,17 @@ function TestPanel({
 
   onClose,
 }: {
-  courseTitle: string
+  courseTitle: string;
 
-  answers: string[]
+  answers: string[];
 
-  setAnswers: (answers: string[]) => void
+  setAnswers: (answers: string[]) => void;
 
-  message: string
+  message: string;
 
-  onSubmit: () => void
+  onSubmit: () => void;
 
-  onClose: () => void
+  onClose: () => void;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b1735]/70 p-4">
@@ -913,11 +1178,11 @@ function TestPanel({
                   name={`question-${index}`}
                   checked={answers[index] === testAnswers[index]}
                   onChange={() => {
-                    const next = [...answers]
+                    const next = [...answers];
 
-                    next[index] = testAnswers[index]
+                    next[index] = testAnswers[index];
 
-                    setAnswers(next)
+                    setAnswers(next);
                   }}
                 />{" "}
                 {testAnswers[index]}
@@ -928,11 +1193,11 @@ function TestPanel({
                   name={`question-${index}`}
                   checked={answers[index] === "other"}
                   onChange={() => {
-                    const next = [...answers]
+                    const next = [...answers];
 
-                    next[index] = "other"
+                    next[index] = "other";
 
-                    setAnswers(next)
+                    setAnswers(next);
                   }}
                 />{" "}
                 I need to review this topic
@@ -953,5 +1218,5 @@ function TestPanel({
         )}
       </div>
     </div>
-  )
+  );
 }
