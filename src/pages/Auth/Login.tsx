@@ -92,7 +92,7 @@ export default function Login() {
                 title: "2.4M+ learners",
                 sub: "Across 190 countries",
               },
-              { icon: "🏆", title: "68,000+ courses", sub: "Updated monthly" },
+              { icon: "🏆", title: "78,000+ courses", sub: "Updated monthly" },
               {
                 icon: "💼",
                 title: "Certificate included",
