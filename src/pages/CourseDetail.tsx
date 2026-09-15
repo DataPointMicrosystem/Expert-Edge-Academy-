@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router";
-import { COURSES } from "../data/courses";
+import type { Course } from "../data/courses";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useLearning } from "../context/useLearning";
 import { formatNaira } from "../lib/money";
+import { getCourse } from "../lib/coursesApi";
+import { learningApi } from "../lib/learningApi";
+import { notify } from "../lib/notify";
+import {
+  getReferralSessionId,
+  getStoredReferralCode,
+  referralsApi,
+} from "../lib/referralsApi";
 
 function StarRating({
   rating,
@@ -31,21 +40,89 @@ function StarRating({
 
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
-  const course = COURSES.find((c) => c.id === id);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewForm, setReviewForm] = useState({
+    title: "",
+    content: "",
+    rating: 5,
+  });
+  const [reviewMessage, setReviewMessage] = useState("");
   const { addToCart, isInCart } = useCart();
-  const { isEnrolled } = useAuth();
+  const { user } = useAuth();
+  const { isEnrolled, enrollFree } = useLearning();
   const navigate = useNavigate();
   const [expandedSection, setExpandedSection] = useState<number | null>(0);
   const inCart = course ? isInCart(course.id) : false;
   const enrolled = course ? isEnrolled(course.id) : false;
 
-  if (!course) {
+  useEffect(() => {
+    if (!id) return;
+    getCourse(id)
+      .then(setCourse)
+      .catch((requestError) =>
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Unable to load this course.",
+        ),
+      )
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    const referralCode = getStoredReferralCode();
+    if (!referralCode || !id) return;
+    referralsApi
+      .track({ referralCode, courseId: id, sessionId: getReferralSessionId() })
+      .catch(() => undefined);
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    learningApi
+      .getReviews(id)
+      .then((response) => setReviews(response.data || []))
+      .catch(() => setReviews([]));
+  }, [id]);
+
+  const submitReview = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!id) return;
+    try {
+      await learningApi.submitReview(id, reviewForm);
+      setReviewMessage("Review submitted.");
+      notify("Review submitted.", "success");
+      setReviewForm({ title: "", content: "", rating: 5 });
+      const response = await learningApi.getReviews(id);
+      setReviews(response.data || []);
+    } catch (requestError) {
+      const message =
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to submit review.";
+      setReviewMessage(message);
+      notify(message, "error");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading course...
+      </div>
+    );
+  }
+
+  if (!course || error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F9F8F5]">
         <div className="text-center">
           <div className="text-5xl mb-4">📚</div>
           <h2 className="font-display font-bold text-2xl text-[#1B1F3B] mb-2">
-            Course not found
+            {error || "Course not found"}
           </h2>
           <Link to="/" className="text-[#F5A623] font-semibold hover:underline">
             ← Back to home
@@ -61,8 +138,13 @@ export default function CourseDetail() {
     0,
   );
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (enrolled) {
+      navigate(`/courses/${course.id}/lessons`);
+      return;
+    }
+    if (course.price === 0 && user) {
+      await enrollFree(course.id);
       navigate(`/courses/${course.id}/lessons`);
       return;
     }
@@ -156,7 +238,11 @@ export default function CourseDetail() {
             <div className="sticky top-20 bg-white rounded-2xl shadow-2xl overflow-hidden text-gray-900">
               <div className="relative">
                 <img
-                  src={`https://images.unsplash.com/${course.image}?w=400&h=220&fit=crop&auto=format`}
+                  src={
+                    course.image.startsWith("http")
+                      ? course.image
+                      : `https://images.unsplash.com/${course.image}?w=400&h=220&fit=crop&auto=format`
+                  }
                   alt={course.title}
                   className="w-full aspect-video object-cover"
                 />
@@ -402,6 +488,89 @@ export default function CourseDetail() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div>
+            <h2 className="mb-5 font-display text-xl font-bold text-[#1B1F3B]">
+              Student reviews
+            </h2>
+            <div className="space-y-3">
+              {reviews.map((review) => (
+                <article
+                  key={review._id || review.id}
+                  className="rounded-2xl border border-gray-100 bg-white p-5"
+                >
+                  <p className="font-bold text-[#1B1F3B]">{review.title}</p>
+                  <p className="mt-1 text-xs text-amber-600">
+                    {review.rating}/5
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                    {review.content}
+                  </p>
+                </article>
+              ))}
+              {reviews.length === 0 && (
+                <p className="text-sm text-gray-500">No reviews yet.</p>
+              )}
+            </div>
+            {enrolled && (
+              <form
+                onSubmit={submitReview}
+                className="mt-5 rounded-2xl border border-gray-100 bg-white p-5"
+              >
+                <h3 className="font-bold text-[#1B1F3B]">
+                  Share your experience
+                </h3>
+                <div className="mt-3 grid gap-3">
+                  <input
+                    required
+                    value={reviewForm.title}
+                    onChange={(event) =>
+                      setReviewForm((current) => ({
+                        ...current,
+                        title: event.target.value,
+                      }))
+                    }
+                    placeholder="Review title"
+                    className="rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <textarea
+                    required
+                    value={reviewForm.content}
+                    onChange={(event) =>
+                      setReviewForm((current) => ({
+                        ...current,
+                        content: event.target.value,
+                      }))
+                    }
+                    placeholder="What did you think?"
+                    className="min-h-24 rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <select
+                    value={reviewForm.rating}
+                    onChange={(event) =>
+                      setReviewForm((current) => ({
+                        ...current,
+                        rating: Number(event.target.value),
+                      }))
+                    }
+                    className="rounded-xl border border-gray-300 px-3 py-2 text-sm"
+                  >
+                    {[5, 4, 3, 2, 1].map((rating) => (
+                      <option key={rating} value={rating}>
+                        {rating}/5
+                      </option>
+                    ))}
+                  </select>
+                  <button className="w-fit rounded-xl bg-primary-blue px-4 py-2 text-sm font-bold text-white">
+                    Submit review
+                  </button>
+                  {reviewMessage && (
+                    <p className="text-sm text-slate-600">{reviewMessage}</p>
+                  )}
+                </div>
+              </form>
+            )}
           </div>
 
           {/* Instructor */}

@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
+import { apiRequest } from "../../lib/api";
+import { notify } from "../../lib/notify";
 import expertedgeLogo from "../../asset/expertedgeLogo.jpg";
 
 export default function ResetPassword() {
+  const [searchParams] = useSearchParams();
+  const [email, setEmail] = useState(searchParams.get("email") || "");
+  const [otp, setOtp] = useState("");
   const [form, setForm] = useState({ password: "", confirmPassword: "" });
   const [errors, setErrors] = useState<{
     password?: string;
@@ -32,7 +37,7 @@ export default function ResetPassword() {
     return nextErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nextErrors = validate();
 
@@ -42,7 +47,21 @@ export default function ResetPassword() {
     }
 
     setErrors({});
-    setSubmitted(true);
+    try {
+      await apiRequest("/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ email, otp, newPassword: form.password }),
+      });
+      setSubmitted(true);
+      notify("Your password has been reset successfully.", "success");
+    } catch (requestError) {
+      const message =
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to reset your password.";
+      setErrors({ password: message });
+      notify(message, "error");
+    }
   };
 
   return (
@@ -83,6 +102,29 @@ export default function ResetPassword() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <label className="block text-sm font-semibold text-gray-700">
+              Email address
+              <input
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                type="email"
+                required
+                className="mt-1.5 w-full rounded-xl border-2 border-neutral-300 bg-white px-4 py-3 text-sm font-normal focus:border-primary-blue focus:outline-none"
+              />
+            </label>
+            <label className="block text-sm font-semibold text-gray-700">
+              Reset code
+              <input
+                value={otp}
+                onChange={(event) =>
+                  setOtp(event.target.value.replace(/\D/g, ""))
+                }
+                inputMode="numeric"
+                maxLength={6}
+                required
+                className="mt-1.5 w-full rounded-xl border-2 border-neutral-300 bg-white px-4 py-3 text-sm font-normal focus:border-primary-blue focus:outline-none"
+              />
+            </label>
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-gray-700">
                 New password

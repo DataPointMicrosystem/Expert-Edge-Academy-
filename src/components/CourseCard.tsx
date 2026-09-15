@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { useLearning } from "../context/useLearning";
 import type { Course } from "../data/courses";
 import { formatNaira } from "../lib/money";
 
@@ -40,10 +42,12 @@ export default function CourseCard({
   course: Course;
   popoverSide?: "left" | "right";
 }) {
-  const [wished, setWished] = useState(false);
+  const { user } = useAuth();
+  const { isWishlisted, toggleWishlist } = useLearning();
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const inCart = isInCart(course.id);
+  const wished = isWishlisted(course.id);
   const discount = Math.round((1 - course.price / course.originalPrice) * 100);
   const hoverFlipClass =
     popoverSide === "left"
@@ -66,7 +70,9 @@ export default function CourseCard({
       <button
         type="button"
         aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
-        onClick={() => setWished((w) => !w)}
+        onClick={() => {
+          if (user) void toggleWishlist(course.id);
+        }}
         className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-slate-100 transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#154c8c]"
       >
         <svg
@@ -86,7 +92,11 @@ export default function CourseCard({
             className="relative block aspect-video shrink-0 overflow-hidden bg-slate-100"
           >
             <img
-              src={`https://images.unsplash.com/${course.image}?w=480&h=270&fit=crop&auto=format`}
+              src={
+                course.image.startsWith("http")
+                  ? course.image
+                  : `https://images.unsplash.com/${course.image}?w=480&h=270&fit=crop&auto=format`
+              }
               alt={course.title}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />

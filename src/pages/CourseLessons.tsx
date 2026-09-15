@@ -1,17 +1,18 @@
-import { useState } from "react"
+import { useEffect, useState } from "react";
 
-import { useParams, Link, Navigate } from "react-router"
+import { useParams, Link, Navigate } from "react-router";
 
-import { COURSES } from "../data/courses"
-
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../context/AuthContext";
+import { useLearning } from "../context/useLearning";
+import { getCourse } from "../lib/coursesApi";
+import type { Course } from "../data/courses";
 
 interface CourseLessonsProps {
-  courseId?: string
+  courseId?: string;
 
-  embedded?: boolean
+  embedded?: boolean;
 
-  onBack?: () => void
+  onBack?: () => void;
 }
 
 export default function CourseLessons({
@@ -21,32 +22,58 @@ export default function CourseLessons({
 
   onBack,
 }: CourseLessonsProps) {
-  const { id: routeCourseId } = useParams<{ id: string }>()
+  const { id: routeCourseId } = useParams<{ id: string }>();
 
-  const id = courseId ?? routeCourseId
+  const id = courseId ?? routeCourseId;
 
-  const course = COURSES.find((c) => c.id === id)
+  const [course, setCourse] = useState<Course | null>(null);
+  const [courseLoading, setCourseLoading] = useState(true);
 
-  const { user, isEnrolled } = useAuth()
+  const { user } = useAuth();
+  const { isEnrolled, enrollmentFor, updateProgress } = useLearning();
 
-  const [activeSection, setActiveSection] = useState(0)
+  const [activeSection, setActiveSection] = useState(0);
 
-  const [activeLecture, setActiveLecture] = useState(0)
+  const [activeLecture, setActiveLecture] = useState(0);
 
   const [sidebarOpen, setSidebarOpen] = useState(() =>
     typeof window === "undefined" ? true : window.innerWidth >= 768,
-  )
+  );
 
-  const [noteText, setNoteText] = useState("")
+  const [noteText, setNoteText] = useState("");
 
-  const [notes, setNotes] = useState<string[]>([])
+  const [notes, setNotes] = useState<string[]>([]);
 
-  const [activeTab, setActiveTab] =
-    useState<"overview" | "notes" | "qa" | "resources">("overview")
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "notes" | "qa" | "resources"
+  >("overview");
 
-  const [completedLectures, setCompletedLectures] = useState<Set<number>>(
-    new Set([1, 2]),
-  )
+  const [completedLectures, setCompletedLectures] = useState<
+    Set<string | number>
+  >(new Set());
+
+  useEffect(() => {
+    if (!id) return;
+    getCourse(id)
+      .then(setCourse)
+      .finally(() => setCourseLoading(false));
+  }, [id]);
+
+  const enrollment = course ? enrollmentFor(course.id) : undefined;
+  const serverProgress = Number(
+    enrollment?.progress?.percentage ??
+      enrollment?.completionPercentage ??
+      enrollment?.progress ??
+      0,
+  );
+
+  if (courseLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#1B1F3B] text-white">
+        Loading lessons...
+      </div>
+    );
+  }
 
   if (!course) {
     return (
@@ -61,7 +88,7 @@ export default function CourseLessons({
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   if (!user) {
@@ -70,60 +97,72 @@ export default function CourseLessons({
         to={`/login?redirectTo=${encodeURIComponent(`/courses/${course.id}/lessons`)}`}
         replace
       />
-    )
+    );
   }
 
-  if (!isEnrolled(course.id)) {
-    return <Navigate to={`/courses/${course.id}`} replace />
+  if (!isEnrolled(course.id) || !enrollment) {
+    return <Navigate to={`/courses/${course.id}`} replace />;
   }
 
-  const allLectures = course.sections.flatMap((s) => s.lectures)
+  const allLectures = course.sections.flatMap((s) => s.lectures);
 
-  const currentLecture = course.sections[activeSection]?.lectures[activeLecture]
+  const currentLecture =
+    course.sections[activeSection]?.lectures[activeLecture];
 
   const currentGlobalIdx =
     course.sections
 
       .slice(0, activeSection)
 
-      .reduce((sum, s) => sum + s.lectures.length, 0) + activeLecture
+      .reduce((sum, s) => sum + s.lectures.length, 0) + activeLecture;
 
-  const totalLectures = allLectures.length
+  const totalLectures = allLectures.length;
 
-  const progress = Math.round((completedLectures.size / totalLectures) * 100)
+  const progress =
+    serverProgress ||
+    (totalLectures
+      ? Math.round((completedLectures.size / totalLectures) * 100)
+      : 0);
 
   const goNext = () => {
-    const section = course.sections[activeSection]
+    const section = course.sections[activeSection];
 
     if (activeLecture < section.lectures.length - 1) {
-      setActiveLecture((l) => l + 1)
+      setActiveLecture((l) => l + 1);
     } else if (activeSection < course.sections.length - 1) {
-      setActiveSection((s) => s + 1)
+      setActiveSection((s) => s + 1);
 
-      setActiveLecture(0)
+      setActiveLecture(0);
     }
-  }
+  };
 
   const goPrev = () => {
     if (activeLecture > 0) {
-      setActiveLecture((l) => l - 1)
+      setActiveLecture((l) => l - 1);
     } else if (activeSection > 0) {
-      setActiveSection((s) => s - 1)
+      setActiveSection((s) => s - 1);
 
-      setActiveLecture(course.sections[activeSection - 1].lectures.length - 1)
+      setActiveLecture(course.sections[activeSection - 1].lectures.length - 1);
     }
-  }
+  };
 
-  const toggleComplete = () => {
+  const toggleComplete = async () => {
+    if (!currentLecture || !enrollment) return;
+    const isCompleted = !completedLectures.has(currentLecture.id);
     setCompletedLectures((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
 
-      if (next.has(currentGlobalIdx)) next.delete(currentGlobalIdx)
-      else next.add(currentGlobalIdx)
+      if (isCompleted) next.add(currentLecture.id);
+      else next.delete(currentLecture.id);
 
-      return next
-    })
-  }
+      return next;
+    });
+    await updateProgress(
+      String(enrollment._id || enrollment.id),
+      String(currentLecture.id),
+      isCompleted,
+    );
+  };
 
   const addNote = () => {
     if (noteText.trim()) {
@@ -131,11 +170,11 @@ export default function CourseLessons({
         `[${currentLecture?.title}]: ${noteText.trim()}`,
 
         ...prev,
-      ])
+      ]);
 
-      setNoteText("")
+      setNoteText("");
     }
-  }
+  };
 
   return (
     <div
@@ -613,9 +652,9 @@ export default function CourseLessons({
                                   (s, sec) => s + sec.lectures.length,
 
                                   0,
-                                ) + section.lectures.indexOf(l)
+                                ) + section.lectures.indexOf(l);
 
-                            return completedLectures.has(gIdx)
+                            return completedLectures.has(gIdx);
                           }).length
                         }
                         /{section.lectures.length} completed
@@ -644,20 +683,21 @@ export default function CourseLessons({
 
                             .slice(0, si)
 
-                            .reduce((s, sec) => s + sec.lectures.length, 0) + li
+                            .reduce((s, sec) => s + sec.lectures.length, 0) +
+                          li;
 
-                        const done = completedLectures.has(gIdx)
+                        const done = completedLectures.has(gIdx);
 
                         const active =
-                          si === activeSection && li === activeLecture
+                          si === activeSection && li === activeLecture;
 
                         return (
                           <button
                             key={lecture.id}
                             onClick={() => {
-                              setActiveSection(si)
+                              setActiveSection(si);
 
-                              setActiveLecture(li)
+                              setActiveLecture(li);
                             }}
                             className={`w-full text-left px-4 py-3 flex items-start gap-3 border-l-2 transition-all ${
                               active
@@ -720,7 +760,7 @@ export default function CourseLessons({
                               </div>
                             </div>
                           </button>
-                        )
+                        );
                       })}
                     </div>
                   )}
@@ -731,5 +771,5 @@ export default function CourseLessons({
         )}
       </div>
     </div>
-  )
+  );
 }

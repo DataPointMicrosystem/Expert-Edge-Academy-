@@ -5,12 +5,21 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  apiRequest,
+  clearAuthSession,
+  getAccessToken,
+  type ApiUser,
+  type AuthResponse,
+} from "../lib/api";
 
 interface User {
+  id?: string;
   name: string;
   email: string;
   avatar?: string;
-  role: "learner" | "instructor";
+  role: "learner" | "instructor" | "admin";
+  isVerified?: boolean;
 }
 
 export type NotificationChannel = "email" | "app" | "sms";
@@ -24,17 +33,24 @@ export interface Purchase {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, name?: string, role?: User["role"], password?: string) => User;
+  login: (email: string, password: string) => Promise<User>;
+  signup: (
+    fullName: string,
+    email: string,
+    password: string,
+    role: User["role"],
+  ) => Promise<void>;
   logout: () => void;
   updateProfile: (profile: { name: string; email: string }) => void;
   notificationChannel: NotificationChannel;
   setNotificationChannel: (channel: NotificationChannel) => void;
-  changePassword: (currentPassword: string, newPassword: string) => string | null;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => string | null;
   enroll: (courseIds: string[], purchases?: Purchase[]) => void;
   isEnrolled: (courseId: string) => boolean;
   purchases: Purchase[];
-  referralCode: string;
-  referralBalance: number;
   markCourseComplete: (courseId: string) => void;
   isCourseComplete: (courseId: string) => boolean;
   isAuthenticated: boolean;
@@ -61,6 +77,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [notificationChannel, setNotificationChannelState] =
     useState<NotificationChannel>("email");
 
+  const mapUser = (apiUser: ApiUser): User => ({
+    id: apiUser.id,
+    name: apiUser.fullName,
+    email: apiUser.email,
+    avatar: apiUser.avatar,
+    role:
+      apiUser.role === "instructor"
+        ? "instructor"
+        : apiUser.role === "admin"
+          ? "admin"
+          : "learner",
+    isVerified: apiUser.isVerified,
+  });
+
   const accountKey = (email: string, key: string) => `${key}:${email}`;
 
   const loadAccountData = (email: string) => {
@@ -84,7 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         accountKey(email, "notificationChannel"),
       );
       setNotificationChannelState(
-        storedChannel === "app" || storedChannel === "sms" ? storedChannel : "email",
+        storedChannel === "app" || storedChannel === "sms"
+          ? storedChannel
+          : "email",
       );
     } catch {
       setEnrolledCourseIds([]);
@@ -93,24 +125,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = (
-    email: string,
-    name = "Learner",
-    role?: User["role"],
-    password?: string,
-  ) => {
-    const storedRole = localStorage.getItem(accountKey(email, "role"));
-    const nextUser: User = {
-      name,
-      email,
-      role: role || (storedRole === "instructor" ? "instructor" : "learner"),
-    };
+  const login = async (email: string, password: string) => {
+    const response = await apiRequest<AuthResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+    const nextUser = mapUser(response.data.user);
+    localStorage.setItem("accessToken", response.data.token);
     setUser(nextUser);
     localStorage.setItem("currentUser", JSON.stringify(nextUser));
-    localStorage.setItem(accountKey(email, "role"), nextUser.role);
-    if (password) localStorage.setItem(accountKey(email, "password"), password);
     loadAccountData(email);
     return nextUser;
+  };
+
+  const signup = async (
+    fullName: string,
+    email: string,
+    password: string,
+    role: User["role"],
+  ) => {
+    await apiRequest("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        fullName,
+        email,
+        password,
+        role: role === "instructor" ? "instructor" : "student",
+      }),
+    });
   };
 
   const logout = () => {
@@ -119,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPurchases([]);
     setCompletedCourseIds([]);
     setNotificationChannelState("email");
-    localStorage.removeItem("currentUser");
+    clearAuthSession();
   };
 
   const updateProfile = (profile: { name: string; email: string }) => {
@@ -133,7 +175,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         "purchases",
         "completedCourseIds",
         "notificationChannel",
-        "password",
       ]) {
         const previousKey = accountKey(user.email, key);
         const nextKey = accountKey(profile.email, key);
@@ -148,18 +189,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setNotificationChannel = (channel: NotificationChannel) => {
     if (!user) return;
     setNotificationChannelState(channel);
-    localStorage.setItem(accountKey(user.email, "notificationChannel"), channel);
+    localStorage.setItem(
+      accountKey(user.email, "notificationChannel"),
+      channel,
+    );
   };
 
-  const changePassword = (currentPassword: string, newPassword: string) => {
-    if (!user) return "You must be signed in to change your password.";
-    const storedPassword = localStorage.getItem(accountKey(user.email, "password"));
-    if (storedPassword && storedPassword !== currentPassword) {
-      return "Your current password is incorrect.";
-    }
-    localStorage.setItem(accountKey(user.email, "password"), newPassword);
-    return null;
-  };
+  const changePassword = (_currentPassword: string, _newPassword: string) =>
+    user ? null : "You must be signed in to change your password.";
 
   const enroll = (courseIds: string[], newPurchases: Purchase[] = []) => {
     setEnrolledCourseIds((previous) => {
@@ -190,11 +227,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isEnrolled = (courseId: string) => enrolledCourseIds.includes(courseId);
-  const referralCode = user
-    ? `${user.name.replace(/\s/g, "").slice(0, 5).toUpperCase()}20`
-    : "LEARN20";
-  const referralBalance = purchases.length * 2500;
-
   const markCourseComplete = (courseId: string) => {
     setCompletedCourseIds((previous) => {
       const next = Array.from(new Set([...previous, courseId]));
@@ -214,11 +246,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) loadAccountData(user.email);
   }, [user]);
 
+  useEffect(() => {
+    if (!getAccessToken()) return;
+    apiRequest<{ data: ApiUser }>("/users/me")
+      .then((response) => {
+        const nextUser = mapUser(response.data);
+        setUser(nextUser);
+        localStorage.setItem("currentUser", JSON.stringify(nextUser));
+      })
+      .catch(() => {
+        clearAuthSession();
+        setUser(null);
+      });
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
         user,
         login,
+        signup,
         logout,
         updateProfile,
         notificationChannel,
@@ -227,8 +274,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         enroll,
         isEnrolled,
         purchases,
-        referralCode,
-        referralBalance,
         markCourseComplete,
         isCourseComplete,
         isAuthenticated: !!user,

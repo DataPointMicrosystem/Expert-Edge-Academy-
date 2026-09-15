@@ -85,9 +85,16 @@ export default function Cart() {
               </div>
               <div className="divide-y divide-slate-200/80">
                 {items.map((item) => (
-                  <article key={item.id} className="flex gap-4 p-5 transition-colors hover:bg-slate-50/70 sm:p-6">
+                  <article
+                    key={item.id}
+                    className="flex gap-4 p-5 transition-colors hover:bg-slate-50/70 sm:p-6"
+                  >
                     <img
-                      src={`https://images.unsplash.com/${item.image}?w=480&h=270&fit=crop&auto=format`}
+                      src={
+                        item.image.startsWith("http")
+                          ? item.image
+                          : `https://images.unsplash.com/${item.image}?w=480&h=270&fit=crop&auto=format`
+                      }
                       alt={item.title}
                       className="h-20 w-28 shrink-0 rounded-xl object-cover ring-1 ring-slate-200 sm:h-24 sm:w-36"
                     />
