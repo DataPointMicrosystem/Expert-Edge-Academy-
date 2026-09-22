@@ -5,6 +5,7 @@ import type { Course } from "../data/courses";
 import CourseCard from "../components/CourseCard";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { EssentialSkillsCarousel } from "@/components/EssentialSkillsCarousel";
+import SubscriptionPlans from "../components/SubscriptionPlans";
 import { getCourses } from "../lib/coursesApi";
 import { notify } from "../lib/notify";
 
@@ -140,6 +141,8 @@ export default function Home() {
           </div>
         </nav>
       </section>
+
+      <SubscriptionPlans />
 
       {/* Promo Banner 1 — Sale */}
       <section className="mx-auto mb-10 w-full max-w-375 px-4 sm:px-6">

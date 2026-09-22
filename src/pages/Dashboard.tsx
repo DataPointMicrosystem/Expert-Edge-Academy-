@@ -20,6 +20,7 @@ import type { NotificationChannel } from "../context/AuthContext";
 import { formatNaira } from "../lib/money";
 
 import CourseLessons from "./CourseLessons";
+import MySubscription from "../components/MySubscription";
 
 import expertedgeLogo from "../asset/expertedgeLogo.jpg";
 
@@ -91,7 +92,7 @@ export default function Dashboard() {
   } = useLearning();
 
   const [activeTab, setActiveTab] = useState<
-    "learning" | "history" | "referrals" | "notifications" | "settings"
+    "learning" | "subscription" | "history" | "referrals" | "notifications" | "settings"
   >("learning");
 
   const [lessonCourseId, setLessonCourseId] = useState<string | null>(null);
@@ -415,6 +416,8 @@ export default function Dashboard() {
             {[
               ["learning", "My learning"],
 
+              ["subscription", "My subscription"],
+
               ["history", "Purchase history"],
 
               ["referrals", "Referral & earnings"],
@@ -567,6 +570,7 @@ export default function Dashboard() {
                 )}
               </div>
             )}
+            {activeTab === "subscription" && <MySubscription />}
             {activeTab === "history" && (
               <div className="border border-slate-200 bg-white p-6">
                 <h2 className="text-2xl font-black text-[#17213D]">

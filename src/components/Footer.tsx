@@ -70,7 +70,7 @@ export default function Footer() {
                 {col.links.map((link) => (
                   <li key={link}>
                     <a
-                      href="#"
+                      href={link === "Pricing" ? "/#subscription" : "#"}
                       className="text-xs text-white/60 hover:text-white transition-colors"
                     >
                       {link}
