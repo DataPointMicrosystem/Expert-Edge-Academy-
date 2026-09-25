@@ -1,5 +1,9 @@
 {
-  "description": "Discover and access a wide range of online courses while empowering instructors to create and monetize their educational content effectively.",
+  "title": "Expert Edge Academy",
+  "description": "Expert Edge Academy is an online learning platform where learners build practical skills through expert-led courses and instructors create and monetize educational content.",
+  "icons": {
+    "icon": "/src/asset/expertedgeLogo.jpg"
+  },
   "robots": {
     "index": false
   },
