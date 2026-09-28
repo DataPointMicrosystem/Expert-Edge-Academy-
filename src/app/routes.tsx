@@ -15,6 +15,17 @@ import FacilitatorDashboard from "../pages/FacilitatorDashboard";
 import TeachOnExpertEdge from "../pages/TeachOnExpertEdge";
 import PaymentCallback from "../pages/PaymentCallback";
 import AdminDashboard from "../pages/AdminDashboard";
+import type { ReactNode } from "react";
+import { NoIndex } from "../lib/seo";
+
+function PrivatePage({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <NoIndex />
+      {children}
+    </>
+  );
+}
 
 export const router = createBrowserRouter([
   {
@@ -53,34 +64,66 @@ export const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login />,
+    element: (
+      <PrivatePage>
+        <Login />
+      </PrivatePage>
+    ),
   },
   {
     path: "/signup",
-    element: <Signup />,
+    element: (
+      <PrivatePage>
+        <Signup />
+      </PrivatePage>
+    ),
   },
   {
     path: "/verify-email",
-    element: <VerifyEmail />,
+    element: (
+      <PrivatePage>
+        <VerifyEmail />
+      </PrivatePage>
+    ),
   },
   {
     path: "/forgot-password",
-    element: <ForgotPassword />,
+    element: (
+      <PrivatePage>
+        <ForgotPassword />
+      </PrivatePage>
+    ),
   },
   {
     path: "/reset-password",
-    element: <ResetPassword />,
+    element: (
+      <PrivatePage>
+        <ResetPassword />
+      </PrivatePage>
+    ),
   },
   {
     path: "/dashboard",
-    element: <Dashboard />,
+    element: (
+      <PrivatePage>
+        <Dashboard />
+      </PrivatePage>
+    ),
   },
   {
     path: "/facilitator",
-    element: <FacilitatorDashboard />,
+    element: (
+      <PrivatePage>
+        <FacilitatorDashboard />
+      </PrivatePage>
+    ),
   },
   {
     path: "/admin",
-    element: <AdminDashboard />,
+    element: (
+      <PrivatePage>
+        <AdminDashboard />
+      </PrivatePage>
+    ),
   },
 ]);
