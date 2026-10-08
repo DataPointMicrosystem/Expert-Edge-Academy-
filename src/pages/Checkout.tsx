@@ -1,9 +1,11 @@
-import { Link, Navigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useLearning } from "../context/useLearning";
 import { formatNaira } from "../lib/money";
-import { apiRequest } from "../lib/api";
+import { ApiError, apiRequest } from "../lib/api";
+import { learningApi } from "../lib/learningApi";
 import { notify } from "../lib/notify";
 import {
   getReferralSessionId,
@@ -11,8 +13,10 @@ import {
 } from "../lib/referralsApi";
 
 export default function Checkout() {
-  const { items, total } = useCart();
+  const { items, total, removeFromCart } = useCart();
   const { user } = useAuth();
+  const { refresh: refreshLearning } = useLearning();
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -73,24 +77,49 @@ export default function Checkout() {
                 }>("/payments/initialize", {
                   method: "POST",
                   body: JSON.stringify({
-                    courseId: items[0].id,
+                    courseId: items[0].backendId || items[0].id,
                     ...(getStoredReferralCode()
                       ? {
                           referralCode: getStoredReferralCode(),
                           referralSessionId: getReferralSessionId(),
                         }
                       : {}),
-                    callbackUrl: `${window.location.origin}/payment/callback?courseId=${encodeURIComponent(items[0].id)}`,
+                    callbackUrl: `${window.location.origin}/payment/callback?courseId=${encodeURIComponent(items[0].backendId || items[0].id)}`,
                   }),
                 });
                 window.location.assign(response.data.authorizationUrl);
               } catch (requestError) {
-                const message =
-                  requestError instanceof Error
-                    ? requestError.message
-                    : "Unable to initialize payment.";
-                notify(message, "error");
-                setError(message);
+                if (
+                  requestError instanceof ApiError &&
+                  requestError.status === 409 &&
+                  requestError.code === "COURSE_INCLUDED_IN_SUBSCRIPTION"
+                ) {
+                  try {
+                    const access = await learningApi.getAccess(
+                      items[0].backendId || items[0].id,
+                    );
+                    if (access.data.access.granted) {
+                      await removeFromCart(items[0].backendId || items[0].id);
+                      await refreshLearning();
+                      navigate(`/courses/${items[0].id}/lessons`);
+                      return;
+                    }
+                  } catch {
+                    // Keep the course in the cart if access cannot be confirmed.
+                  }
+                  setError(
+                    "This course may be included in your plan, but we could not confirm access. Please refresh your subscription status or contact support.",
+                  );
+                } else if (
+                  requestError instanceof ApiError &&
+                  requestError.status === 409
+                ) {
+                  setError("This course is already in your learning library.");
+                } else {
+                  setError(
+                    "We could not start checkout. Please try again shortly.",
+                  );
+                }
               } finally {
                 setLoading(false);
               }
@@ -98,47 +127,12 @@ export default function Checkout() {
             className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
           >
             <h2 className="text-lg font-bold text-[#0b1735]">
-              Payment details
+              Payment via Kora
             </h2>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <label className="sm:col-span-2 text-sm font-semibold text-slate-700">
-                Cardholder name
-                <input
-                  required
-                  type="text"
-                  defaultValue={user.name}
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
-                />
-              </label>
-              <label className="sm:col-span-2 text-sm font-semibold text-slate-700">
-                Card number
-                <input
-                  required
-                  inputMode="numeric"
-                  pattern="[0-9 ]{12,19}"
-                  placeholder="1234 5678 9012 3456"
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
-                />
-              </label>
-              <label className="text-sm font-semibold text-slate-700">
-                Expiry date
-                <input
-                  required
-                  placeholder="MM / YY"
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
-                />
-              </label>
-              <label className="text-sm font-semibold text-slate-700">
-                CVV
-                <input
-                  required
-                  inputMode="numeric"
-                  pattern="[0-9]{3,4}"
-                  placeholder="123"
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-primary-blue"
-                />
-              </label>
-            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Continue to Kora’s secure hosted checkout to enter your payment
+              details. Your card information is never collected on this page.
+            </p>
             {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
             <button
               type="submit"

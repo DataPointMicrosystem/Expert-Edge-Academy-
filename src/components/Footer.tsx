@@ -1,22 +1,45 @@
 import { Link } from "react-router";
-import Logo from "../asset/expertedgeLogo.jpg";
 
 export default function Footer() {
   const getCurrentYear = () => {
     const date = new Date();
     return date.getFullYear();
   };
+  const destinations: Record<string, string> = {
+    "Browse courses": "/#courses",
+    Categories: "/#courses",
+    Pricing: "/#subscription",
+    Enterprise: "mailto:info@expertedgeacademy.ng",
+    "Become an instructor": "/teach",
+    "Instructor handbook": "/teach",
+    "Revenue share": "/revenue-share",
+    Community: "/community",
+    "About us": "/about",
+    Careers: "/careers",
+    Blog: "/blog",
+    "Press kit": "/press-kit",
+    "Help center": "/help-center",
+    Accessibility: "/accessibility",
+    "Terms of use": "/terms-of-use",
+    "Privacy policy": "/privacy-policy",
+  };
+
   return (
     <footer className="bg-[#0b1735] px-4 pb-8 pt-14 text-white sm:px-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 grid grid-cols-2 gap-8 md:grid-cols-5">
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="mb-4 flex items-center gap-2">
-              <img
-                src={Logo}
-                alt="Expert Edge Academy"
-                className="h-12 w-auto object-contain"
-              />
+              <span
+                className="flex size-9 items-center justify-center rounded-lg bg-white text-sm font-black text-[#154c8c]"
+                aria-hidden="true"
+              >
+                E
+              </span>
+              <span className="text-sm font-bold text-white">
+                ExpertEdge{" "}
+                <span className="font-medium text-white/60">Academy</span>
+              </span>
             </Link>
             <p className="text-xs leading-relaxed text-white/60">
               Online learning that opens doors and creates lasting
@@ -69,12 +92,21 @@ export default function Footer() {
               <ul className="flex flex-col gap-2">
                 {col.links.map((link) => (
                   <li key={link}>
-                    <a
-                      href={link === "Pricing" ? "/#subscription" : "#"}
-                      className="text-xs text-white/60 hover:text-white transition-colors"
-                    >
-                      {link}
-                    </a>
+                    {destinations[link].startsWith("mailto:") ? (
+                      <a
+                        href={destinations[link]}
+                        className="text-xs text-white/60 transition-colors hover:text-white"
+                      >
+                        {link}
+                      </a>
+                    ) : (
+                      <Link
+                        to={destinations[link]}
+                        className="text-xs text-white/60 transition-colors hover:text-white"
+                      >
+                        {link}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

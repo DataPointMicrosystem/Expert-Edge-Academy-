@@ -18,6 +18,7 @@ export default function ResetPassword() {
     confirmPassword: false,
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
     const nextErrors: { password?: string; confirmPassword?: string } = {};
@@ -47,10 +48,12 @@ export default function ResetPassword() {
     }
 
     setErrors({});
+    setIsSubmitting(true);
     try {
       await apiRequest("/auth/reset-password", {
         method: "POST",
         body: JSON.stringify({ email, otp, newPassword: form.password }),
+        timeoutMs: 60000,
       });
       setSubmitted(true);
       notify("Your password has been reset successfully.", "success");
@@ -61,6 +64,8 @@ export default function ResetPassword() {
           : "Unable to reset your password.";
       setErrors({ password: message });
       notify(message, "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -209,9 +214,10 @@ export default function ResetPassword() {
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-primary-blue px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-deep-blue"
+              disabled={isSubmitting}
+              className="w-full rounded-xl bg-primary-blue px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-deep-blue disabled:cursor-wait disabled:opacity-70"
             >
-              Reset password
+              {isSubmitting ? "Resetting password..." : "Reset password"}
             </button>
           </form>
         )}

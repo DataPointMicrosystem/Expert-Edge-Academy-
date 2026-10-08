@@ -1,7 +1,9 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(
-  /\/$/,
-  "",
-);
+const configuredApiBase = (
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:1023/api"
+).replace(/\/$/, "");
+const API_BASE_URL = configuredApiBase.endsWith("/api")
+  ? configuredApiBase
+  : `${configuredApiBase}/api`;
 
 export class ApiError extends Error {
   status: number;
@@ -26,25 +28,29 @@ export function clearAuthSession() {
 
 export async function apiRequest<T>(
   path: string,
-  options: RequestInit = {},
+  options: RequestInit & { timeoutMs?: number } = {},
 ): Promise<T> {
   if (!API_BASE_URL) {
     throw new ApiError("API base URL is not configured.", 0, "CONFIG_ERROR");
   }
 
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 15000);
+  const { timeoutMs = 15000, ...requestOptions } = options;
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   const token = getAccessToken();
-  const headers = new Headers(options.headers);
+  const headers = new Headers(requestOptions.headers);
 
-  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
+  if (
+    !headers.has("Content-Type") &&
+    !(requestOptions.body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
+      ...requestOptions,
       headers,
       signal: controller.signal,
     });

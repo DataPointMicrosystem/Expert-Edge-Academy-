@@ -607,7 +607,7 @@ export const COURSES = [
   },
 ];
 
-export type Course = (typeof COURSES)[0];
+export type Course = (typeof COURSES)[0] & { backendId?: string };
 
 export const HERO_SLIDES = [
   {

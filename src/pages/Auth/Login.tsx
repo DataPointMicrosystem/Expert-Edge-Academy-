@@ -10,7 +10,11 @@ export default function Login() {
   const location = useLocation();
   const redirectTo =
     new URLSearchParams(location.search).get("redirectTo") || "/";
-  const [form, setForm] = useState({ email: "", password: "" });
+  const searchParams = new URLSearchParams(location.search);
+  const [form, setForm] = useState({
+    email: searchParams.get("email") || "",
+    password: "",
+  });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {},
   );
@@ -141,6 +145,14 @@ export default function Login() {
           <h1 className="font-display font-black text-3xl text-charcoal mb-1">
             Log in to your account
           </h1>
+          {searchParams.get("verified") === "1" && (
+            <p
+              role="status"
+              className="mb-4 mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+            >
+              Your email is verified. Sign in to continue.
+            </p>
+          )}
           <p className="text-gray-500 text-sm mb-8">
             New to ExpertEdge?{" "}
             <Link

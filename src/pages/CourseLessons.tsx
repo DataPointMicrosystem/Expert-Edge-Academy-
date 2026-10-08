@@ -5,6 +5,8 @@ import { useParams, Link, Navigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useLearning } from "../context/useLearning";
 import { getCourse } from "../lib/coursesApi";
+import { learningApi } from "../lib/learningApi";
+import { ApiError } from "../lib/api";
 import type { Course } from "../data/courses";
 
 interface CourseLessonsProps {
@@ -28,9 +30,12 @@ export default function CourseLessons({
 
   const [course, setCourse] = useState<Course | null>(null);
   const [courseLoading, setCourseLoading] = useState(true);
+  const [accessStatus, setAccessStatus] = useState<
+    "checking" | "granted" | "denied" | "error"
+  >("checking");
 
   const { user } = useAuth();
-  const { isEnrolled, enrollmentFor, updateProgress } = useLearning();
+  const { enrollmentFor, updateProgress, refresh } = useLearning();
 
   const [activeSection, setActiveSection] = useState(0);
 
@@ -54,10 +59,38 @@ export default function CourseLessons({
 
   useEffect(() => {
     if (!id) return;
+    let active = true;
+    setCourseLoading(true);
+    setAccessStatus("checking");
     getCourse(id)
-      .then(setCourse)
-      .finally(() => setCourseLoading(false));
-  }, [id]);
+      .then(async (nextCourse) => {
+        if (!active) return;
+        setCourse(nextCourse);
+        if (!user) return;
+        try {
+          const result = await learningApi.getAccess(
+            nextCourse.backendId || nextCourse.id,
+          );
+          if (!active) return;
+          setAccessStatus(result.data.access.granted ? "granted" : "denied");
+          if (result.data.access.granted) await refresh();
+        } catch (error) {
+          if (!active) return;
+          setAccessStatus(
+            error instanceof ApiError && error.status === 403
+              ? "denied"
+              : "error",
+          );
+        }
+      })
+      .catch(() => {
+        if (active) setCourse(null);
+      })
+      .finally(() => active && setCourseLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [id, user?.id]);
 
   const enrollment = course ? enrollmentFor(course.id) : undefined;
   const serverProgress = Number(
@@ -100,8 +133,53 @@ export default function CourseLessons({
     );
   }
 
-  if (!isEnrolled(course.id) || !enrollment) {
-    return <Navigate to={`/courses/${course.id}`} replace />;
+  if (accessStatus === "checking") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#1B1F3B] text-white">
+        Checking your course access...
+      </div>
+    );
+  }
+
+  if (accessStatus !== "granted") {
+    return (
+      <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-4 py-16">
+        <section className="max-w-lg text-center">
+          <h1 className="font-display text-2xl font-bold text-[#0b1735]">
+            {accessStatus === "denied"
+              ? "Course access required"
+              : "We could not confirm your access"}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            {accessStatus === "denied"
+              ? "Choose a subscription plan or enrol in this course to continue learning."
+              : "Please check your connection and try again. Your course access has not been opened."}
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              to="/#subscription"
+              className="rounded-lg bg-[#154c8c] px-4 py-2.5 text-sm font-semibold text-white"
+            >
+              Explore plans
+            </Link>
+            <Link
+              to={`/courses/${course.id}`}
+              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700"
+            >
+              Course details
+            </Link>
+            {accessStatus === "error" && (
+              <button
+                onClick={() => window.location.reload()}
+                className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700"
+              >
+                Try again
+              </button>
+            )}
+          </div>
+        </section>
+      </main>
+    );
   }
 
   const allLectures = course.sections.flatMap((s) => s.lectures);

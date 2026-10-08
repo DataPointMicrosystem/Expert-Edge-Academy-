@@ -21,9 +21,16 @@ export const learningApi = {
       body: JSON.stringify(body),
     }),
   getAccess: (courseId: string) =>
-    apiRequest<{ data: { hasAccess: boolean } }>(
-      `/enrollments/access/${courseId}`,
-    ),
+    apiRequest<{
+      data: {
+        courseId: string;
+        access: {
+          granted: boolean;
+          source: "subscription" | "enrollment" | "free";
+        };
+        enrollment: Enrollment | null;
+      };
+    }>(`/enrollments/access/${encodeURIComponent(courseId)}`),
   getWishlist: () => apiRequest<{ data: any[] }>("/wishlist"),
   addWishlist: (courseId: string) =>
     apiRequest(`/wishlist/add/${courseId}`, { method: "POST" }),

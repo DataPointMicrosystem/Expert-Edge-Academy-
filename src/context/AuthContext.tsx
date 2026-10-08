@@ -13,9 +13,10 @@ import {
   type AuthResponse,
 } from "../lib/api";
 import {
-  getSubscriptionPlan,
-  type SubscriptionPlanId,
-} from "../data/subscriptionPlans";
+  subscriptionsApi,
+  type CurrentSubscription,
+  type SubscriptionEntitlement,
+} from "../lib/subscriptionsApi";
 
 interface User {
   id?: string;
@@ -33,13 +34,6 @@ export interface Purchase {
   title: string;
   amount: number;
   purchasedAt: string;
-}
-
-export interface Subscription {
-  planId: SubscriptionPlanId;
-  status: "active" | "pending";
-  startedAt: string;
-  renewalDate: string | null;
 }
 
 interface AuthContextType {
@@ -64,35 +58,14 @@ interface AuthContextType {
   purchases: Purchase[];
   markCourseComplete: (courseId: string) => void;
   isCourseComplete: (courseId: string) => boolean;
-  subscription: Subscription;
-  setSubscriptionPlan: (planId: SubscriptionPlanId) => void;
+  subscription: CurrentSubscription | null;
+  subscriptionEntitlement: SubscriptionEntitlement;
+  subscriptionLoading: boolean;
+  refreshSubscription: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-function createSubscription(
-  planId: SubscriptionPlanId,
-  status: Subscription["status"],
-): Subscription {
-  const startedAt = new Date();
-  const plan = getSubscriptionPlan(planId);
-  const durationMatch = plan.duration.match(/^(\d+) months$/);
-  const renewalDate = durationMatch
-    ? new Date(
-        startedAt.getFullYear(),
-        startedAt.getMonth() + Number(durationMatch[1]),
-        startedAt.getDate(),
-      ).toISOString()
-    : null;
-
-  return {
-    planId,
-    status,
-    startedAt: startedAt.toISOString(),
-    renewalDate,
-  };
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -112,9 +85,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [completedCourseIds, setCompletedCourseIds] = useState<string[]>([]);
   const [notificationChannel, setNotificationChannelState] =
     useState<NotificationChannel>("email");
-  const [subscription, setSubscription] = useState<Subscription>(() =>
-    createSubscription("beginner", "active"),
+  const [subscription, setSubscription] = useState<CurrentSubscription | null>(
+    null,
   );
+  const [subscriptionEntitlement, setSubscriptionEntitlement] =
+    useState<SubscriptionEntitlement>({ active: false, courses: [] });
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
   const mapUser = (apiUser: ApiUser): User => ({
     id: apiUser.id,
@@ -149,23 +125,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.getItem(accountKey(email, "completedCourseIds")) || "[]",
         ),
       );
-      const storedSubscription = localStorage.getItem(
-        accountKey(email, "subscription"),
-      );
-      if (storedSubscription) {
-        const parsedSubscription = JSON.parse(storedSubscription) as Subscription;
-        setSubscription({
-          ...parsedSubscription,
-          planId: getSubscriptionPlan(parsedSubscription.planId).id as SubscriptionPlanId,
-        });
-      } else {
-        const defaultSubscription = createSubscription("beginner", "active");
-        setSubscription(defaultSubscription);
-        localStorage.setItem(
-          accountKey(email, "subscription"),
-          JSON.stringify(defaultSubscription),
-        );
-      }
       const storedChannel = localStorage.getItem(
         accountKey(email, "notificationChannel"),
       );
@@ -178,7 +137,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setEnrolledCourseIds([]);
       setPurchases([]);
       setCompletedCourseIds([]);
-      setSubscription(createSubscription("beginner", "active"));
+      setSubscription(null);
+      setSubscriptionEntitlement({ active: false, courses: [] });
     }
   };
 
@@ -218,6 +178,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPurchases([]);
     setCompletedCourseIds([]);
     setNotificationChannelState("email");
+    setSubscription(null);
+    setSubscriptionEntitlement({ active: false, courses: [] });
     clearAuthSession();
   };
 
@@ -232,7 +194,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         "purchases",
         "completedCourseIds",
         "notificationChannel",
-        "subscription",
       ]) {
         const previousKey = accountKey(user.email, key);
         const nextKey = accountKey(profile.email, key);
@@ -300,23 +261,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isCourseComplete = (courseId: string) =>
     completedCourseIds.includes(courseId);
 
-  const setSubscriptionPlan = (planId: SubscriptionPlanId) => {
-    if (!user) return;
-    const plan = getSubscriptionPlan(planId);
-    const nextSubscription = createSubscription(
-      planId,
-      plan.price === 0 ? "active" : "pending",
-    );
-    setSubscription(nextSubscription);
-    localStorage.setItem(
-      accountKey(user.email, "subscription"),
-      JSON.stringify(nextSubscription),
-    );
+  const refreshSubscription = async () => {
+    if (!user) {
+      setSubscription(null);
+      setSubscriptionEntitlement({ active: false, courses: [] });
+      return;
+    }
+    setSubscriptionLoading(true);
+    try {
+      const response = await subscriptionsApi.getMine();
+      setSubscription(response.data.subscription);
+      setSubscriptionEntitlement(response.data.entitlement);
+    } catch {
+      setSubscription(null);
+      setSubscriptionEntitlement({ active: false, courses: [] });
+    } finally {
+      setSubscriptionLoading(false);
+    }
   };
 
   useEffect(() => {
     if (user) loadAccountData(user.email);
+    else {
+      setSubscription(null);
+      setSubscriptionEntitlement({ active: false, courses: [] });
+    }
   }, [user]);
+
+  useEffect(() => {
+    void refreshSubscription();
+  }, [user?.id]);
 
   useEffect(() => {
     if (!getAccessToken()) return;
@@ -349,7 +323,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         markCourseComplete,
         isCourseComplete,
         subscription,
-        setSubscriptionPlan,
+        subscriptionEntitlement,
+        subscriptionLoading,
+        refreshSubscription,
         isAuthenticated: !!user,
       }}
     >

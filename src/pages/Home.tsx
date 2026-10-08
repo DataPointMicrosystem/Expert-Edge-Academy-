@@ -7,7 +7,7 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { EssentialSkillsCarousel } from "@/components/EssentialSkillsCarousel";
 import SubscriptionPlans from "../components/SubscriptionPlans";
 import { getCourses } from "../lib/coursesApi";
-import { notify } from "../lib/notify";
+import { useAuth } from "../context/AuthContext";
 import {
   Seo,
   DEFAULT_DESCRIPTION,
@@ -17,12 +17,14 @@ import {
 
 export default function Home() {
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const query = searchParams.get("q") ?? "";
   const categoryParam = searchParams.get("category");
   const [selectedCat, setSelectedCat] = useState(categoryParam ?? "All");
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     setSelectedCat(categoryParam ?? "All");
@@ -38,21 +40,15 @@ export default function Home() {
       .then((nextCourses) => active && setCourses(nextCourses))
       .catch((requestError) => {
         if (!active) return;
-        const message =
-          requestError instanceof Error &&
-          requestError.message.includes("temporarily unavailable")
-            ? "The course catalog is temporarily unavailable. Please try again in a moment."
-            : requestError instanceof Error
-              ? requestError.message
-              : "Unable to load courses.";
-        setError(message);
-        notify(message, "error");
+        setError(
+          "We couldn't load courses right now. Please try again in a moment.",
+        );
       })
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
-  }, [query]);
+  }, [query, retryCount]);
 
   const filtered =
     selectedCat === "All"
@@ -235,7 +231,24 @@ export default function Home() {
               Loading courses...
             </div>
           ) : error ? (
-            <div className="py-20 text-center text-red-500">{error}</div>
+            <div
+              role="alert"
+              className="mx-auto flex max-w-xl flex-col items-center border-y border-slate-200 px-5 py-9 text-center"
+            >
+              <p className="text-base font-semibold text-[#0b1735]">
+                Courses are temporarily unavailable
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                {error}
+              </p>
+              <button
+                type="button"
+                onClick={() => setRetryCount((count) => count + 1)}
+                className="mt-4 rounded-full bg-[#154c8c] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0b1735] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#154c8c]"
+              >
+                Try again
+              </button>
+            </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-gray-400">
               <div className="text-5xl mb-4">🔍</div>
@@ -501,10 +514,16 @@ export default function Home() {
 
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <Link
-                to="/signup"
+                to={
+                  user
+                    ? user.role === "instructor"
+                      ? "/facilitator"
+                      : "/dashboard"
+                    : "/signup"
+                }
                 className="inline-flex items-center justify-center rounded-full bg-[#f7b955] px-8 py-4 text-base font-bold text-[#0b1735] shadow-[0_20px_40px_rgba(247,185,85,0.3)] transition-colors hover:bg-[#f6c779]"
               >
-                Get started for free
+                {user ? "Go to your dashboard" : "Get started for free"}
               </Link>
               <a
                 href="#courses"

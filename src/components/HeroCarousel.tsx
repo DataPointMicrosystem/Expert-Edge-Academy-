@@ -1,8 +1,10 @@
 import { HERO_SLIDES } from "@/data/courses";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
+import { useAuth } from "../context/AuthContext";
 
 export function HeroCarousel() {
+  const { user } = useAuth();
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
 
@@ -79,10 +81,16 @@ export function HeroCarousel() {
               {slide.cta}
             </a>
             <Link
-              to="/signup"
+              to={
+                user
+                  ? user.role === "instructor"
+                    ? "/facilitator"
+                    : "/dashboard"
+                  : "/signup"
+              }
               className="rounded-full border border-white/25 bg-white/5 px-5 py-3 text-sm font-bold text-white backdrop-blur-sm hover:bg-white/10 sm:px-7 sm:py-3.5"
             >
-              Start for free →
+              {user ? "Go to your dashboard →" : "Start for free →"}
             </Link>
           </div>
 

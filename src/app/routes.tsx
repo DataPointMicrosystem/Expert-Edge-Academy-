@@ -15,6 +15,8 @@ import FacilitatorDashboard from "../pages/FacilitatorDashboard";
 import TeachOnExpertEdge from "../pages/TeachOnExpertEdge";
 import PaymentCallback from "../pages/PaymentCallback";
 import AdminDashboard from "../pages/AdminDashboard";
+import SiteInfo from "../pages/SiteInfo";
+import SubscriptionReturn from "../pages/SubscriptionReturn";
 import type { ReactNode } from "react";
 import { NoIndex } from "../lib/seo";
 
@@ -57,8 +59,16 @@ export const router = createBrowserRouter([
         element: <TeachOnExpertEdge />,
       },
       {
+        path: ":page",
+        element: <SiteInfo />,
+      },
+      {
         path: "payment/callback",
         element: <PaymentCallback />,
+      },
+      {
+        path: "subscriptions/return",
+        element: <SubscriptionReturn />,
       },
     ],
   },

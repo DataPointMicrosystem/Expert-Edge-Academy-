@@ -69,11 +69,21 @@ export default function Signup() {
         form.password,
         form.role as "learner" | "instructor",
       );
-      localStorage.setItem(
+      localStorage.removeItem("pendingEmailVerification");
+      sessionStorage.setItem(
         "pendingEmailVerification",
-        JSON.stringify({ ...form, redirectTo }),
+        JSON.stringify({
+          name: form.name,
+          email: form.email,
+          role: form.role,
+          redirectTo,
+        }),
       );
-      navigate(`/verify-email?email=${encodeURIComponent(form.email)}`);
+      const verificationParams = new URLSearchParams({
+        email: form.email,
+        redirectTo,
+      });
+      navigate(`/verify-email?${verificationParams.toString()}`);
     } catch (error) {
       const message =
         error instanceof Error

@@ -30,6 +30,7 @@ export function toCourse(course: RemoteCourse): Course {
 
   return {
     id: course.slug || course._id || course.id,
+    backendId: course._id || course.id,
     title: course.title || "Untitled course",
     instructor,
     instructorAvatar:

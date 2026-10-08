@@ -60,14 +60,23 @@ export default function ForgotPassword() {
           </h1>
           <p className="mt-2 text-sm leading-6 text-gray-500">
             Enter the email address linked to your account and we’ll send you a
-            reset link.
+            6-digit reset code.
           </p>
         </div>
 
         {submitted ? (
-          <div className="rounded-2xl border border-success/20 bg-success/10 p-4 text-sm text-success">
-            We’ve sent a password reset link to{" "}
-            <span className="font-semibold">{email}</span>.
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-success/20 bg-success/10 p-4 text-sm leading-6 text-success">
+              We’ve sent a 6-digit reset code to{" "}
+              <span className="font-semibold">{email}</span>. Enter that code
+              and choose a new password to finish resetting your account.
+            </div>
+            <Link
+              to={`/reset-password?email=${encodeURIComponent(email)}`}
+              className="block w-full rounded-xl bg-primary-blue px-4 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-deep-blue"
+            >
+              Enter reset code
+            </Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,7 +105,7 @@ export default function ForgotPassword() {
               type="submit"
               className="w-full rounded-xl bg-primary-blue px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-deep-blue"
             >
-              Send reset link
+              Send reset code
             </button>
           </form>
         )}
